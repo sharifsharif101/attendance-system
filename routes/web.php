@@ -1,12 +1,16 @@
 <?php
 
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AttendanceStatusController;
 use App\Http\Controllers\AuditController;
+use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AttendanceStatusController;
-use App\Http\Controllers\ReportController;
+
 Route::get('/', function () {
     return redirect()->route('attendance.index');
 });
@@ -16,6 +20,7 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // الملف الشخصي
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -50,19 +55,47 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:audit.view')
         ->name('audit.index');
 
+    // التقارير
+    Route::get('/reports/daily', [ReportController::class, 'daily'])
+        ->middleware('permission:reports.view')
+        ->name('reports.daily');
+
+    Route::get('/reports/monthly', [ReportController::class, 'monthly'])
+        ->middleware('permission:reports.view')
+        ->name('reports.monthly');
+
+    // الإعدادات
+    Route::get('/settings', [SettingController::class, 'index'])
+        ->middleware('permission:users.manage')
+        ->name('settings.index');
+
+    Route::post('/settings', [SettingController::class, 'update'])
+        ->middleware('permission:users.manage')
+        ->name('settings.update');
+
+    Route::post('/settings/month', [SettingController::class, 'updateMonth'])
+        ->middleware('permission:users.manage')
+        ->name('settings.updateMonth');
+
+    Route::post('/settings/reset-month', [SettingController::class, 'resetMonth'])
+        ->middleware('permission:users.manage')
+        ->name('settings.resetMonth');
+
     // إدارة المستخدمين
     Route::resource('users', UserController::class)
         ->middleware('permission:users.manage');
 
-        Route::resource('statuses', AttendanceStatusController::class)
-    ->middleware('permission:users.manage');
-    Route::get('/reports/daily', [ReportController::class, 'daily'])
-    ->middleware('permission:reports.view')
-    ->name('reports.daily');
+    // حالات الحضور
+    Route::resource('statuses', AttendanceStatusController::class)
+        ->middleware('permission:users.manage');
 
-Route::get('/reports/monthly', [ReportController::class, 'monthly'])
-    ->middleware('permission:reports.view')
-    ->name('reports.monthly');
+    // إدارة الأقسام
+    Route::resource('departments', DepartmentController::class)
+        ->middleware('permission:departments.manage');
+
+    // إدارة الموظفين
+    Route::resource('employees', EmployeeController::class)
+        ->middleware('permission:departments.manage');
 });
 
 require __DIR__.'/auth.php';

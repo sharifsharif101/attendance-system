@@ -27,10 +27,22 @@
     سجل التدقيق
 </x-nav-link>
 @endcan
-
+@can('reports.view')
+<x-nav-link :href="route('reports.daily')" :active="request()->routeIs('reports.daily')">
+    تقرير يومي
+</x-nav-link>
+<x-nav-link :href="route('reports.monthly')" :active="request()->routeIs('reports.monthly')">
+    تقرير شهري
+</x-nav-link>
+@endcan
 @can('users.manage')
 <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
     المستخدمين
+</x-nav-link>
+@endcan
+@can('departments.manage')
+<x-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.*')">
+    الأقسام
 </x-nav-link>
 @endcan
 @can('users.manage')
@@ -38,7 +50,11 @@
     حالات الحضور
 </x-nav-link>
 @endcan
- 
+ @can('users.manage')
+<x-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.*')">
+    الإعدادات
+</x-nav-link>
+@endcan
             </div>
 
             <!-- Settings Dropdown -->
