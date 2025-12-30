@@ -147,15 +147,22 @@
                                                 {{ $employee->name }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                <select name="attendance[{{ $index }}][status]"
-    class="rounded-md border-gray-300 shadow-sm text-sm"
-    {{ $isLocked ? 'disabled' : '' }}>
-    @foreach($statuses as $status)
-        <option value="{{ $status->code }}" {{ $record?->status == $status->code ? 'selected' : '' }}>
-            {{ $status->name }}
-        </option>
-    @endforeach
-</select>
+<div class="flex items-center gap-2">
+    <span class="w-3 h-3 rounded-full status-color-{{ $index }}" 
+        style="background-color: {{ $statuses->firstWhere('code', $record?->status)?->color ?? '#6b7280' }}"></span>
+    <select name="attendance[{{ $index }}][status]"
+        class="rounded-md border-gray-300 shadow-sm text-sm"
+        {{ $isLocked ? 'disabled' : '' }}
+        onchange="updateColor(this, {{ $index }})">
+        @foreach($statuses as $status)
+            <option value="{{ $status->code }}" 
+                data-color="{{ $status->color }}"
+                {{ $record?->status == $status->code ? 'selected' : '' }}>
+                {{ $status->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <input type="text" name="attendance[{{ $index }}][notes]"
@@ -187,4 +194,14 @@
             </div>
         </div>
     </div>
+    <script>
+function updateColor(select, index) {
+    const selectedOption = select.options[select.selectedIndex];
+    const color = selectedOption.getAttribute('data-color');
+    const colorSpan = document.querySelector('.status-color-' + index);
+    if (colorSpan) {
+        colorSpan.style.backgroundColor = color;
+    }
+}
+</script>   
 </x-app-layout>

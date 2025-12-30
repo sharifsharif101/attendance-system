@@ -6,7 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AttendanceStatusController;
-
+use App\Http\Controllers\ReportController;
 Route::get('/', function () {
     return redirect()->route('attendance.index');
 });
@@ -56,6 +56,13 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('statuses', AttendanceStatusController::class)
     ->middleware('permission:users.manage');
+    Route::get('/reports/daily', [ReportController::class, 'daily'])
+    ->middleware('permission:reports.view')
+    ->name('reports.daily');
+
+Route::get('/reports/monthly', [ReportController::class, 'monthly'])
+    ->middleware('permission:reports.view')
+    ->name('reports.monthly');
 });
 
 require __DIR__.'/auth.php';

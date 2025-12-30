@@ -33,6 +33,12 @@
     المستخدمين
 </x-nav-link>
 @endcan
+@can('users.manage')
+<x-nav-link :href="route('statuses.index')" :active="request()->routeIs('statuses.*')">
+    حالات الحضور
+</x-nav-link>
+@endcan
+ 
             </div>
 
             <!-- Settings Dropdown -->
