@@ -44,9 +44,18 @@
                                             </span>
                                         @endforeach
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                        {{ $user->departments->pluck('name')->join(', ') ?: '-' }}
-                                    </td>
+                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+    <div class="max-w-xs">
+        @if($user->departments->count() > 3)
+            <span title="{{ $user->departments->pluck('name')->join(', ') }}">
+                {{ $user->departments->take(3)->pluck('name')->join(', ') }}
+                <span class="text-blue-500 cursor-pointer">+{{ $user->departments->count() - 3 }} أقسام</span>
+            </span>
+        @else
+            {{ $user->departments->pluck('name')->join(', ') ?: '-' }}
+        @endif
+    </div>
+</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <a href="{{ route('users.edit', $user) }}" 
                                             class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 ml-2">تعديل</a>

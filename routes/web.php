@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/attendance/bulk', [AttendanceController::class, 'bulkStore'])
         ->middleware('permission:attendance.create')
         ->name('attendance.bulk');
+    Route::post('/attendance/ajax-bulk', [AttendanceController::class, 'ajaxBulkStore'])->name('attendance.ajax.bulk');
     
     Route::post('/attendance/store-all', [AttendanceController::class, 'storeAll'])
         ->middleware('permission:attendance.create')

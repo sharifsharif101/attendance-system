@@ -141,7 +141,7 @@ $statuses = AttendanceStatus::getActive();
             'department_id' => 'required|exists:departments,id',
             'attendance' => 'required|array',
             'attendance.*.employee_id' => 'required|exists:employees,id',
-            'attendance.*.status' => 'required|in:present,absent,late,excused,leave',
+    'attendance.*.status' => 'required|string|max:50',
         ]);
 
         // التحقق من القفل
@@ -251,5 +251,52 @@ private function checkDepartmentAccess($departmentId)
     }
     
     return true;
+}
+
+// حفظ جماعي عبر AJAX
+public function ajaxBulkStore(Request $request)
+{
+    $this->checkDepartmentAccess($request->department_id);
+    
+    $request->validate([
+        'date' => 'required|date',
+        'department_id' => 'required|exists:departments,id',
+        'employee_ids' => 'required|array',
+        'employee_ids.*' => 'exists:employees,id',
+        'status' => 'required|string',
+    ]);
+
+    // التحقق من القفل
+    $isLocked = \App\Models\DayLock::where('date', $request->date)
+        ->where('department_id', $request->department_id)
+        ->exists();
+
+    if ($isLocked) {
+        return response()->json([
+            'success' => false,
+            'message' => 'هذا اليوم مقفل'
+        ], 403);
+    }
+
+    $count = 0;
+    foreach ($request->employee_ids as $employeeId) {
+        AttendanceRecord::updateOrCreate(
+            [
+                'employee_id' => $employeeId,
+                'date' => $request->date,
+            ],
+            [
+                'status' => $request->status,
+                'recorded_by' => Auth::id(),
+            ]
+        );
+        $count++;
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => "تم حفظ $count سجل بنجاح",
+        'count' => $count
+    ]);
 }
 }
