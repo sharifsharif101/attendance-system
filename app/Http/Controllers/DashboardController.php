@@ -23,14 +23,19 @@ class DashboardController extends Controller
         $totalDepartments = Department::where('is_active', true)->count();
         $totalUsers = User::count();
         
+   
         // إحصائيات اليوم
         $todayRecords = AttendanceRecord::where('date', $today)->count();
-        $todayPresent = AttendanceRecord::where('date', $today)
-            ->whereIn('status', ['present', 'late'])
-            ->count();
-        $todayAbsent = AttendanceRecord::where('date', $today)
-            ->where('status', 'absent')
-            ->count();
+
+        // إحصائيات اليوم حسب الحالة
+        $todayStats = AttendanceRecord::where('date', $today)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
+$todayPresent = ($todayStats['present'] ?? 0) + ($todayStats['late'] ?? 0);
+$todayAbsent = $todayStats['absent'] ?? 0;
         
         // نسبة الحضور اليوم
         $todayAttendanceRate = $totalEmployees > 0 
@@ -88,20 +93,21 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
         
-        return view('dashboard', compact(
-            'totalEmployees',
-            'totalDepartments', 
-            'totalUsers',
-            'todayRecords',
-            'todayPresent',
-            'todayAbsent',
-            'todayAttendanceRate',
-            'monthlyStats',
-            'statuses',
-            'departmentStats',
-            'recentRecords',
-            'today',
-            'currentMonth'
-        ));
+return view('dashboard', compact(
+    'totalEmployees',
+    'totalDepartments', 
+    'totalUsers',
+    'todayRecords',
+    'todayPresent',
+    'todayAbsent',
+    'todayAttendanceRate',
+    'todayStats',
+    'monthlyStats',
+    'statuses',
+    'departmentStats',
+    'recentRecords',
+    'today',
+    'currentMonth'
+));
     }
 }

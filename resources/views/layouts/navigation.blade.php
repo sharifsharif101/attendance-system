@@ -1,4 +1,5 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }"
+ class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -42,7 +43,11 @@
                         المستخدمين
                     </x-nav-link>
                     @endcan
-
+                @can('roles.manage')
+                <x-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')">
+                    الأدوار
+                </x-nav-link>
+                @endcan
                     @can('departments.manage')
                     <x-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.*')">
                         الأقسام

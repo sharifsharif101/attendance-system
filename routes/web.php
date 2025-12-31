@@ -11,6 +11,10 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoleController;
+
+
+
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
@@ -96,6 +100,9 @@ Route::middleware('auth')->group(function () {
     // إدارة الموظفين
     Route::resource('employees', EmployeeController::class)
         ->middleware('permission:departments.manage');
+
+        Route::resource('roles', RoleController::class)
+    ->middleware('permission:roles.manage');
 });
 
 require __DIR__.'/auth.php';

@@ -83,28 +83,29 @@
 
             {{-- إحصائيات اليوم --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                {{-- حالة اليوم --}}
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                            📅 إحصائيات اليوم ({{ $today }})
-                        </h3>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <p class="text-3xl font-bold text-blue-500">{{ $todayRecords }}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">إجمالي السجلات</p>
-                            </div>
-                            <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <p class="text-3xl font-bold text-green-500">{{ $todayPresent }}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">حاضر</p>
-                            </div>
-                            <div class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                <p class="text-3xl font-bold text-red-500">{{ $todayAbsent }}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">غائب</p>
-                            </div>
-                        </div>
-                    </div>
+    
+            {{-- حالة اليوم --}}
+<div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+    <div class="p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            📅 إحصائيات اليوم ({{ $today }})
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p class="text-3xl font-bold text-blue-500">{{ $todayRecords }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">إجمالي السجلات</p>
+            </div>
+            @foreach($statuses as $status)
+                <div class="text-center p-4 rounded-lg" style="background-color: {{ $status->color }}15; border: 1px solid {{ $status->color }}40;">
+                    <p class="text-3xl font-bold" style="color: {{ $status->color }}">
+                        {{ $todayStats[$status->code] ?? 0 }}
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $status->name }}</p>
                 </div>
+            @endforeach
+        </div>
+    </div>
+</div>
 
                 {{-- إحصائيات الشهر --}}
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">

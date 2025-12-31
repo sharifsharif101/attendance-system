@@ -57,6 +57,8 @@ $statuses = AttendanceStatus::getActive();
     // حفظ الحضور
     public function store(Request $request)
     {
+            $this->checkDepartmentAccess($request->department_id);
+
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'date' => 'required|date',
@@ -91,6 +93,8 @@ $statuses = AttendanceStatus::getActive();
     // التحضير الجماعي
     public function bulkStore(Request $request)
     {
+            $this->checkDepartmentAccess($request->department_id);
+
         $request->validate([
             'department_id' => 'required|exists:departments,id',
             'date' => 'required|date',
@@ -130,6 +134,8 @@ $statuses = AttendanceStatus::getActive();
     // حفظ الكل دفعة واحدة
     public function storeAll(Request $request)
     {
+            $this->checkDepartmentAccess($request->department_id);
+
         $request->validate([
             'date' => 'required|date',
             'department_id' => 'required|exists:departments,id',
@@ -168,6 +174,8 @@ $statuses = AttendanceStatus::getActive();
     // قفل اليوم
     public function lockDay(Request $request)
     {
+            $this->checkDepartmentAccess($request->department_id);
+
         $request->validate([
             'date' => 'required|date',
             'department_id' => 'required|exists:departments,id',
@@ -208,6 +216,8 @@ $statuses = AttendanceStatus::getActive();
     // فتح اليوم
     public function unlockDay(Request $request)
     {
+            $this->checkDepartmentAccess($request->department_id);
+
         $request->validate([
             'date' => 'required|date',
             'department_id' => 'required|exists:departments,id',
@@ -223,4 +233,23 @@ $statuses = AttendanceStatus::getActive();
 
         return back()->with('error', 'هذا اليوم غير مقفل');
     }
+    // التحقق من صلاحية المستخدم على القسم
+private function checkDepartmentAccess($departmentId)
+{
+    $user = Auth::user();
+    
+    // الأدمن يمكنه الوصول لكل الأقسام
+    if ($user->hasRole('admin')) {
+        return true;
+    }
+    
+    // التحقق من أن القسم ضمن أقسام المستخدم
+    $userDepartmentIds = $user->departments()->pluck('departments.id')->toArray();
+    
+    if (!in_array($departmentId, $userDepartmentIds)) {
+        abort(403, 'ليس لديك صلاحية على هذا القسم');
+    }
+    
+    return true;
+}
 }
