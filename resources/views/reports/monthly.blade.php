@@ -1,26 +1,26 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             التقرير الشهري
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
 
                     {{-- فلترة --}}
                     <form method="GET" action="{{ route('reports.monthly') }}" class="mb-6">
                         <div class="flex flex-row gap-4 items-end">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">الشهر</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الشهر</label>
                                 <input type="month" name="month" value="{{ $month }}" 
-                                    class="rounded-md border-gray-300 shadow-sm">
+                                    class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">القسم</label>
-                                <select name="department_id" class="rounded-md border-gray-300 shadow-sm">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">القسم</label>
+                                <select name="department_id" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm">
                                     <option value="">اختر القسم</option>
                                     @foreach($departments as $department)
                                         <option value="{{ $department->id }}" 
@@ -42,32 +42,32 @@
                     @if($departmentId && $employees->count() > 0)
                         {{-- جدول التقرير الشهري --}}
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الموظف</th>
-                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">أيام العمل</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الموظف</th>
+                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">أيام العمل</th>
                                         @foreach($statuses as $status)
                                             <th class="px-4 py-3 text-center text-xs font-medium uppercase" 
                                                 style="color: {{ $status->color }}">
                                                 {{ $status->name }}
                                             </th>
                                         @endforeach
-                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">نسبة الانضباط</th>
+                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">نسبة الانضباط</th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach($employees as $employee)
                                         @php
                                             $stats = $summary[$employee->id];
                                             $rate = $stats['attendance_rate'];
                                         @endphp
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                                 <div>{{ $employee->name }}</div>
-                                                <div class="text-xs text-gray-500">{{ $employee->employee_number }}</div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $employee->employee_number }}</div>
                                             </td>
-                                            <td class="px-4 py-4 text-center font-bold">
+                                            <td class="px-4 py-4 text-center font-bold text-gray-900 dark:text-gray-100">
                                                 {{ $workingDays }}
                                             </td>
                                             @foreach($statuses as $status)
@@ -79,7 +79,7 @@
                                                             {{ $count }}
                                                         </span>
                                                     @else
-                                                        <span class="text-gray-300">0</span>
+                                                        <span class="text-gray-300 dark:text-gray-600">0</span>
                                                     @endif
                                                 </td>
                                             @endforeach
@@ -98,9 +98,9 @@
                             </table>
                         </div>
                     @elseif($departmentId)
-                        <p class="text-gray-500">لا يوجد موظفين في هذا القسم</p>
+                        <p class="text-gray-500 dark:text-gray-400">لا يوجد موظفين في هذا القسم</p>
                     @else
-                        <p class="text-gray-500">اختر القسم واضغط عرض التقرير</p>
+                        <p class="text-gray-500 dark:text-gray-400">اختر القسم واضغط عرض التقرير</p>
                     @endif
 
                 </div>

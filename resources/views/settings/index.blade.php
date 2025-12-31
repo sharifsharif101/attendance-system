@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             إعدادات النظام
         </h2>
     </x-slot>
@@ -8,17 +8,13 @@
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             
-            @if(session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
+         <x-alert />
 
             {{-- الإعدادات الافتراضية --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-semibold mb-4">الإعدادات الافتراضية</h3>
-                    <p class="text-sm text-gray-500 mb-4">هذه الإعدادات تُطبق على الأشهر التي ليس لها إعداد خاص</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">هذه الإعدادات تُطبق على الأشهر التي ليس لها إعداد خاص</p>
                     
                     <form method="POST" action="{{ route('settings.update') }}">
                         @csrf
@@ -29,8 +25,8 @@
                                         name="weekend_days[]" 
                                         value="{{ $key }}"
                                         {{ in_array($key, $defaultWeekendDays) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-blue-600 shadow-sm">
-                                    <span class="mr-2 text-gray-700">{{ $name }}</span>
+                                        class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700">
+                                    <span class="mr-2 text-gray-700 dark:text-gray-300">{{ $name }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -43,18 +39,18 @@
             </div>
 
             {{-- إعدادات شهر معين --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
                     <h3 class="text-lg font-semibold mb-4">إعدادات شهر معين</h3>
-                    <p class="text-sm text-gray-500 mb-4">يمكنك تخصيص أيام الإجازة لشهر محدد</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">يمكنك تخصيص أيام الإجازة لشهر محدد</p>
                     
                     {{-- اختيار الشهر --}}
                     <form method="GET" action="{{ route('settings.index') }}" class="mb-6">
                         <div class="flex gap-4 items-end">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">اختر الشهر</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اختر الشهر</label>
                                 <input type="month" name="month" value="{{ $month }}" 
-                                    class="rounded-md border-gray-300 shadow-sm">
+                                    class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm">
                             </div>
                             <button type="submit" 
                                 class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
@@ -65,11 +61,11 @@
 
                     {{-- حالة الشهر --}}
                     @if($hasCustomSetting)
-                        <div class="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded mb-4">
+                        <div class="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-600 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded mb-4">
                             ⚙️ هذا الشهر له إعدادات خاصة
                         </div>
                     @else
-                        <div class="bg-gray-100 border border-gray-300 text-gray-600 px-4 py-3 rounded mb-4">
+                        <div class="bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-4 py-3 rounded mb-4">
                             📋 هذا الشهر يستخدم الإعدادات الافتراضية
                         </div>
                     @endif
@@ -86,8 +82,8 @@
                                         name="weekend_days[]" 
                                         value="{{ $key }}"
                                         {{ in_array($key, $weekendDays) ? 'checked' : '' }}
-                                        class="rounded border-gray-300 text-green-600 shadow-sm">
-                                    <span class="mr-2 text-gray-700">{{ $name }}</span>
+                                        class="rounded border-gray-300 dark:border-gray-600 text-green-600 shadow-sm dark:bg-gray-700">
+                                    <span class="mr-2 text-gray-700 dark:text-gray-300">{{ $name }}</span>
                                 </label>
                             @endforeach
                         </div>
