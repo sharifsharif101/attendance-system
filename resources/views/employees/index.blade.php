@@ -70,8 +70,11 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="{{ route('employees.edit', $employee) }}" 
-                                            class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 ml-2">تعديل</a>
+                                        <a href="{{ route('employee.report', $employee) }}" 
+    class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 ml-2">📋 تقرير</a>
+
+<a href="{{ route('employees.edit', $employee) }}" 
+    class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 ml-2">تعديل</a>
                                         
                                         <form method="POST" action="{{ route('employees.destroy', $employee) }}" 
                                             class="inline" onsubmit="return confirm('هل أنت متأكد؟')">

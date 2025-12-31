@@ -28,15 +28,52 @@
                         سجل التدقيق
                     </x-nav-link>
                     @endcan
-
-                    @can('reports.view')
-                    <x-nav-link :href="route('reports.daily')" :active="request()->routeIs('reports.daily')">
-                        تقرير يومي
-                    </x-nav-link>
-                    <x-nav-link :href="route('reports.monthly')" :active="request()->routeIs('reports.monthly')">
-                        تقرير شهري
-                    </x-nav-link>
-                    @endcan
+@can('reports.view')
+<div class="hidden sm:flex sm:items-center" x-data="{ open: false }">
+    <div class="relative">
+        <button @click="open = !open" 
+            class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
+            {{ request()->routeIs('reports.*') || request()->routeIs('employee.report') 
+                ? 'border-indigo-400 dark:border-indigo-500 text-gray-900 dark:text-gray-100' 
+                : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-white hover:border-gray-300' }}">
+          التقارير
+            <svg class="mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        
+        <div x-show="open" 
+            @click.outside="open = false"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="absolute right-0 z-50 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5"
+            style="display: none;">
+            <div class="py-1">
+                <a href="{{ route('reports.daily') }}" 
+                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700
+                    {{ request()->routeIs('reports.daily') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+                    📅 تقرير يومي
+                </a>
+                <a href="{{ route('reports.monthly') }}" 
+                    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700
+                    {{ request()->routeIs('reports.monthly') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+                    📆 تقرير شهري
+                </a>
+          <hr class="my-1 border-gray-200 dark:border-gray-600">
+<a href="{{ route('reports.employee.search') }}" 
+    class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700
+    {{ request()->routeIs('reports.employee.search') || request()->routeIs('employee.report') ? 'bg-gray-100 dark:bg-gray-700' : '' }}">
+    🔍 تقرير موظف
+</a>
+            </div>
+        </div>
+    </div>
+</div>
+@endcan
 
                     @can('users.manage')
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">

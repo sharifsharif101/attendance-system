@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\EmployeeReportController;
 
 
 
@@ -104,6 +105,12 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('roles', RoleController::class)
     ->middleware('permission:roles.manage');
+    Route::get('/reports/employee-search', [EmployeeReportController::class, 'search'])
+    ->middleware(['auth', 'permission:reports.view'])
+    ->name('reports.employee.search');
+    Route::get('/employee/{employee}/report', [EmployeeReportController::class, 'show'])
+    ->middleware(['auth', 'permission:reports.view'])
+    ->name('employee.report');
 });
 
 require __DIR__.'/auth.php';
