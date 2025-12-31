@@ -18,7 +18,7 @@ class EmployeeController extends Controller
             ->when($departmentId, function ($query) use ($departmentId) {
                 $query->where('department_id', $departmentId);
             })
-            ->orderBy('name')
+            ->orderByDesc('created_at')
             ->paginate(20);
 
         return view('employees.index', compact('employees', 'departments', 'departmentId'));

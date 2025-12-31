@@ -1,6 +1,12 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="">
+
     <head>
+        <script>
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.documentElement.classList.add('dark');
+    }
+</script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -14,9 +20,10 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+   <body class="font-sans antialiased bg-gray-100 dark:bg-gray-900">
+
+<div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+             @include('layouts.navigation')
 
             <!-- Page Heading -->
             @isset($header)
@@ -32,5 +39,29 @@
                 {{ $slot }}
             </main>
         </div>
+        <script>
+    function toggleDarkMode() {
+        const html = document.documentElement;
+        const icon = document.getElementById('darkModeIcon');
+        
+        if (html.classList.contains('dark')) {
+            html.classList.remove('dark');
+            localStorage.setItem('darkMode', 'false');
+            icon.textContent = '🌙';
+        } else {
+            html.classList.add('dark');
+            localStorage.setItem('darkMode', 'true');
+            icon.textContent = '☀️';
+        }
+    }
+
+    // تحديث الأيقونة عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        const icon = document.getElementById('darkModeIcon');
+        if (icon && localStorage.getItem('darkMode') === 'true') {
+            icon.textContent = '☀️';
+        }
+    });
+</script>
     </body>
 </html>
