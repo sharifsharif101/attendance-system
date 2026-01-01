@@ -62,31 +62,41 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse($records as $record)
+                                @forelse($employees as $employee)
                                     @php
-                                        $statusData = $statuses->firstWhere('code', $record->status);
+                                        $record = $employee->attendanceRecords->first();
+                                        if ($record) {
+                                            $statusData = $statuses->firstWhere('code', $record->status);
+                                            $statusName = $statusData->name ?? $record->status;
+                                            $statusColor = $statusData->color ?? '#6b7280';
+                                            $notes = $record->notes ?? '-';
+                                        } else {
+                                            $statusName = 'غير مسجل';
+                                            $statusColor = '#9ca3af';
+                                            $notes = '-';
+                                        }
                                     @endphp
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $record->employee->employee_number }}
+                                            {{ $employee->employee_number }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $record->employee->name }}
+                                            {{ $employee->name }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <span class="px-2 py-1 rounded text-white" 
-                                                style="background-color: {{ $statusData->color ?? '#6b7280' }}">
-                                                {{ $statusData->name ?? $record->status }}
+                                                style="background-color: {{ $statusColor }}">
+                                                {{ $statusName }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $record->notes ?? '-' }}
+                                            {{ $notes }}
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="4" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                            لا توجد سجلات لهذا اليوم
+                                            لا يوجد موظفين في هذا القسم
                                         </td>
                                     </tr>
                                 @endforelse
