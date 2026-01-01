@@ -117,23 +117,57 @@ class DashboardController extends Controller
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
-        
-        return view('dashboard', compact(
-            'totalEmployees',
-            'totalDepartments', 
-            'totalUsers',
-            'todayRecords',
-            'todayPresent',
-            'todayAbsent',
-            'todayExcluded',
-            'todayAttendanceRate',
-            'todayStats',
-            'monthlyStats',
-            'statuses',
-            'departmentStats',
-            'recentRecords',
-            'today',
-            'currentMonth'
-        ));
+        // تنبيهات الوثائق المنتهية قريباً
+$today = Carbon::today();
+$thirtyDaysLater = Carbon::today()->addDays(30);
+$sixtyDaysLater = Carbon::today()->addDays(60);
+
+// جوازات تنتهي خلال 30 يوم
+$expiringPassports = Employee::where('is_active', true)
+    ->whereNotNull('passport_expiry')
+    ->whereBetween('passport_expiry', [$today, $thirtyDaysLater])
+    ->count();
+
+// إقامات تنتهي خلال 60 يوم
+$expiringResidencies = Employee::where('is_active', true)
+    ->whereNotNull('residency_expiry')
+    ->whereBetween('residency_expiry', [$today, $sixtyDaysLater])
+    ->count();
+
+// عقود تنتهي خلال 30 يوم
+$expiringContracts = Employee::where('is_active', true)
+    ->whereNotNull('contract_expiry')
+    ->whereBetween('contract_expiry', [$today, $thirtyDaysLater])
+    ->count();
+
+// وثائق منتهية
+$expiredDocuments = Employee::where('is_active', true)
+    ->where(function($q) use ($today) {
+        $q->where('passport_expiry', '<', $today)
+          ->orWhere('residency_expiry', '<', $today)
+          ->orWhere('contract_expiry', '<', $today);
+    })
+    ->count();
+return view('dashboard', compact(
+    'totalEmployees',
+    'totalDepartments', 
+    'totalUsers',
+    'todayRecords',
+    'todayPresent',
+    'todayAbsent',
+    'todayExcluded',
+    'todayAttendanceRate',
+    'todayStats',
+    'monthlyStats',
+    'statuses',
+    'departmentStats',
+    'recentRecords',
+    'today',
+    'currentMonth',
+    'expiringPassports',
+    'expiringResidencies',
+    'expiringContracts',
+    'expiredDocuments'
+));
     }
 }

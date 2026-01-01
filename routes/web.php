@@ -120,6 +120,9 @@ Route::get('/audit/{activity}', [AuditController::class, 'show'])
     Route::get('/employee/{employee}/report', [EmployeeReportController::class, 'show'])
     ->middleware(['auth', 'permission:reports.view'])
     ->name('employee.report');
+    Route::get('/documents/expiring', [EmployeeController::class, 'expiringDocuments'])
+    ->middleware(['auth', 'permission:departments.manage'])
+    ->name('documents.expiring');
 });
 
 require __DIR__.'/auth.php';

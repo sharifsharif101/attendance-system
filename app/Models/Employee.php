@@ -8,16 +8,37 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
 {
-    protected $fillable = [
-        'name',
-        'employee_number',
-        'department_id',
-        'is_active',
-    ];
+protected $fillable = [
+    'name',
+    'employee_number',
+    'department_id',
+    'national_id',
+    'nationality',
+    'birth_date',
+    'gender',
+    'marital_status',
+    'phone',
+    'email',
+    'passport_number',
+    'passport_expiry',
+    'residency_number',
+    'residency_expiry',
+    'hire_date',
+    'job_title',
+    'contract_type',
+    'contract_expiry',
+    'photo',
+    'is_active',
+];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+protected $casts = [
+    'birth_date' => 'date',
+    'passport_expiry' => 'date',
+    'residency_expiry' => 'date',
+    'hire_date' => 'date',
+    'contract_expiry' => 'date',
+    'is_active' => 'boolean',
+];
 
     // القسم التابع له
     public function department(): BelongsTo

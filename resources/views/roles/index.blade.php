@@ -1,172 +1,161 @@
 @php
-    // تعريف الألوان والتنسيقات للأدوار في مكان واحد (لم يتم تغيير هذا الجزء)
+    // تم الاحتفاظ بمنطق الألوان كما هو لضمان عمل الكود الخلفي
     $roleStyles = [
-        'admin' => ['color' => 'red', 'label_color' => 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400', 'header_bg' => 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300'],
-        'manager' => ['color' => 'purple', 'label_color' => 'bg-purple-500/10 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400', 'header_bg' => 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'],
-        'general_supervisor' => ['color' => 'blue', 'label_color' => 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400', 'header_bg' => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'],
-        'supervisor' => ['color' => 'green', 'label_color' => 'bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400', 'header_bg' => 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'],
-        'data_entry' => ['color' => 'yellow', 'label_color' => 'bg-yellow-500/10 text-yellow-600 dark:bg-yellow-500/20 dark:text-yellow-400', 'header_bg' => 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'],
-        'auditor' => ['color' => 'gray', 'label_color' => 'bg-gray-500/10 text-gray-600 dark:bg-gray-500/20 dark:text-gray-400', 'header_bg' => 'bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300'],
+        'admin' => ['color' => 'red', 'bg_soft' => 'bg-red-50 dark:bg-red-900/20', 'text' => 'text-red-600 dark:text-red-400'],
+        'manager' => ['color' => 'purple', 'bg_soft' => 'bg-purple-50 dark:bg-purple-900/20', 'text' => 'text-purple-600 dark:text-purple-400'],
+        'general_supervisor' => ['color' => 'blue', 'bg_soft' => 'bg-blue-50 dark:bg-blue-900/20', 'text' => 'text-blue-600 dark:text-blue-400'],
+        'supervisor' => ['color' => 'green', 'bg_soft' => 'bg-green-50 dark:bg-green-900/20', 'text' => 'text-green-600 dark:text-green-400'],
+        'data_entry' => ['color' => 'yellow', 'bg_soft' => 'bg-yellow-50 dark:bg-yellow-900/20', 'text' => 'text-yellow-600 dark:text-yellow-400'],
+        'auditor' => ['color' => 'gray', 'bg_soft' => 'bg-gray-50 dark:bg-gray-800', 'text' => 'text-gray-600 dark:text-gray-400'],
     ];
 @endphp
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center p-2">
-            <h2 class="font-bold text-2xl text-gray-900 dark:text-gray-100 leading-tight flex items-center gap-2">
-                <span class="text-blue-600 dark:text-blue-400">🔐</span> إدارة الأدوار والصلاحيات
-            </h2>
+        <div class="flex justify-between items-end pb-2">
+            <div>
+                <h2 class="font-bold text-3xl text-gray-900 dark:text-white tracking-tight leading-tight">
+                    إدارة الأدوار
+                </h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">التحكم في الصلاحيات والمستخدمين</p>
+            </div>
+            
+            {{-- Apple Style Button: Pill shape, subtle shadow, System Blue --}}
             <a href="{{ route('roles.create') }}" 
-                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition ease-in-out duration-150 shadow-md">
-                <span class="ml-1">+</span> إضافة دور جديد
+                class="inline-flex items-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 border border-transparent rounded-full font-medium text-sm text-white shadow-lg shadow-blue-500/30 transition-all duration-200 transform hover:scale-[1.02]">
+                <svg class="w-5 h-5 ml-2 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                إضافة دور جديد
             </a>
         </div>
     </x-slot>
 
-    <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+    <div class="py-10 bg-gray-50 dark:bg-black min-h-screen">
+        <div class="max-w-[85rem] mx-auto sm:px-6 lg:px-8 space-y-10">
 
             <x-alert />
 
-            {{-- 1. ملخص الأدوار (لم يتغير) --}}
-            <div>
-                <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
-                    📊 ملخص الأدوار الحالية
-                </h3>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {{-- 1. ملخص الأدوار (Cards) --}}
+            <section>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                     @foreach($roles as $role)
                         @php
-                            $style = $roleStyles[$role->name] ?? ['color' => 'indigo', 'label_color' => 'bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400', 'header_bg' => 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'];
-                            $color = $style['color'];
+                            $style = $roleStyles[$role->name] ?? $roleStyles['auditor'];
                         @endphp
-                        {{-- بطاقة بتصميم Google Material Card --}}
-                        <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 flex flex-col justify-between border-t-4 border-{{ $color }}-600">
-                            <h4 class="font-extrabold text-lg text-gray-900 dark:text-gray-100 mb-2">
-                                {{ $roleLabels[$role->name] ?? $role->name }}
-                            </h4>
-                            <div class="space-y-2 text-sm">
-                                <span class="flex items-center gap-2 {{ $style['label_color'] }} px-3 py-1 rounded-full w-full">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2v-3m-4 5h-7a2 2 0 01-2-2v-4a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2z"></path></svg>
-                                    <span class="font-medium">{{ $role->permissions->count() }} صلاحية</span>
-                                </span>
-                                <span class="flex items-center gap-2 bg-green-500/10 text-green-600 dark:bg-green-500/20 dark:text-green-400 px-3 py-1 rounded-full w-full">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                                    <span class="font-medium">{{ $role->users->count() }} مستخدم</span>
-                                </span>
+                        {{-- Card Design: Clean, No Borders, Soft Shadow, Rounded-3xl --}}
+                        <div class="group relative bg-white dark:bg-gray-900 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-none dark:border dark:border-white/10 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
+                            <div class="flex flex-col h-full justify-between">
+                                <div>
+                                    <div class="flex items-center justify-between mb-4">
+                                        <div class="w-2 h-2 rounded-full bg-{{ $style['color'] }}-500 ring-4 ring-{{ $style['color'] }}-100 dark:ring-{{ $style['color'] }}-900"></div>
+                                        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Role</span>
+                                    </div>
+                                    <h4 class="font-bold text-xl text-gray-900 dark:text-white mb-1">
+                                        {{ $roleLabels[$role->name] ?? $role->name }}
+                                    </h4>
+                                </div>
+                                
+                                <div class="mt-6 space-y-3">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-gray-500 dark:text-gray-400">الصلاحيات</span>
+                                        <span class="font-semibold {{ $style['text'] }} {{ $style['bg_soft'] }} px-2.5 py-0.5 rounded-lg">
+                                            {{ $role->permissions->count() }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-gray-500 dark:text-gray-400">المستخدمين</span>
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2.5 py-0.5 rounded-lg">
+                                            {{ $role->users->count() }}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
-            </div>
+            </section>
 
             {{-- 2. مصفوفة الصلاحيات --}}
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg sm:rounded-xl">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-                    
-                    <h3 class="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100">📋 مصفوفة الأدوار والصلاحيات</h3>
-                    
-                    <div class="overflow-x-auto relative shadow-md rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            {{-- رأس الجدول (Sticky Header) --}}
-                            <thead class="sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-6 py-4 text-right text-xs font-bold text-gray-600 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700 w-1/5 min-w-[200px] border-l dark:border-gray-700">
-                                        الصلاحية
-                                    </th>
-                                    @foreach($roles as $role)
-                                        @php
-                                            $style = $roleStyles[$role->name] ?? ['color' => 'indigo', 'header_bg' => 'bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300'];
-                                            $color = $style['color'];
-                                        @endphp
-                                        <th class="px-3 py-4 text-center text-xs font-bold uppercase w-auto min-w-[120px] {{ $style['header_bg'] }} border-l dark:border-gray-700 last:border-l-0">
-                                            <div class="font-extrabold text-sm mb-2">{{ $roleLabels[$role->name] ?? $role->name }}</div>
-                                            <div class="flex flex-col gap-1 items-center">
-                                                
-                                                {{-- التعديل هنا: زر مخطط وواضح بشكل افتراضي --}}
-                                                <a href="{{ route('roles.edit', $role) }}" 
-                                                    class="w-full text-center px-2 py-1 rounded-md text-xs border border-{{ $color }}-600 text-{{ $color }}-600 dark:border-{{ $color }}-400 dark:text-{{ $color }}-400 hover:bg-{{ $color }}-600 hover:text-white transition shadow-sm">
-                                                    ✏️ تعديل
+            <section class="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-[0_20px_50px_rgb(0,0,0,0.05)] dark:shadow-none dark:border dark:border-white/10 overflow-hidden ring-1 ring-black/5">
+                <div class="p-8 pb-4">
+                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white">مصفوفة الصلاحيات</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">نظرة شاملة على توزيع الصلاحيات لكل دور</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        {{-- Sticky Header with Blur Effect --}}
+                        <thead class="sticky top-0 z-20">
+                            <tr>
+                                <th class="px-8 py-5 text-xs font-bold text-gray-500 uppercase tracking-wider bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 text-right min-w-[220px]">
+                                    الصلاحية
+                                </th>
+                                @foreach($roles as $role)
+                                    @php $style = $roleStyles[$role->name] ?? $roleStyles['auditor']; @endphp
+                                    <th class="px-4 py-5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 min-w-[140px]">
+                                        <div class="flex flex-col items-center gap-3">
+                                            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ $roleLabels[$role->name] ?? $role->name }}</span>
+                                            
+                                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                {{-- Minimal Edit Button --}}
+                                                <a href="{{ route('roles.edit', $role) }}" title="تعديل"
+                                                    class="p-1.5 rounded-full text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                                 </a>
                                                 
                                                 @if($role->name !== 'admin')
-                                                    <form method="POST" action="{{ route('roles.destroy', $role) }}" class="inline w-full" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدور؟')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        {{-- التعديل هنا: زر حذف بلون رمادي أغمق لتباين أفضل --}}
-                                                        <button type="submit" class="w-full text-center px-2 py-1 bg-gray-600 text-white rounded-md text-xs hover:bg-red-700 transition shadow-sm">
-                                                            🗑️ حذف
+                                                    {{-- Minimal Delete Button --}}
+                                                    <form method="POST" action="{{ route('roles.destroy', $role) }}" class="inline" onsubmit="return confirm('حذف الدور؟')">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" title="حذف" class="p-1.5 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                         </button>
                                                     </form>
                                                 @endif
                                             </div>
-                                        </th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-
-                            {{-- جسم الجدول (لم يتغير) --}}
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @foreach($groupedPermissions as $group => $perms)
-                                    {{-- عنوان المجموعة --}}
-                                    <tr class="bg-gray-100 dark:bg-gray-700/70">
-                                        <td colspan="{{ $roles->count() + 1 }}" class="px-6 py-3">
-                                            <span class="font-extrabold text-md text-gray-800 dark:text-gray-200 flex items-center gap-2">
-                                                @if($group === 'الحضور') 📅
-                                                @elseif($group === 'التقارير') 📊
-                                                @elseif($group === 'التدقيق') 🔍
-                                                @elseif($group === 'الإدارة') ⚙️
-                                                @endif
-                                                {{ $group }}
-                                            </span>
-                                        </td>
-                                    </tr>
-
-                                    {{-- صفوف الصلاحيات --}}
-                                    @foreach($perms as $permission)
-                                        <tr class="hover:bg-blue-50/50 dark:hover:bg-gray-700 transition duration-150">
-                                            <td class="px-6 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 border-l dark:border-gray-700">
-                                                {{ $permissionLabels[$permission->name] ?? $permission->name }}
-                                            </td>
-                                            @foreach($roles as $role)
-                                                <td class="px-3 py-3 text-center border-l dark:border-gray-700 last:border-l-0">
-                                                    @if($role->hasPermissionTo($permission->name))
-                                                        {{-- تصميم Checkmark (Material Success) --}}
-                                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500 dark:bg-green-600 shadow-sm text-white transition duration-200 transform hover:scale-110" title="ممنوحة">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                                                        </span>
-                                                    @else
-                                                        {{-- تصميم Cross (Material Alert/Disabled) --}}
-                                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 text-red-500 dark:text-red-400 transition duration-200 transform hover:scale-110" title="غير ممنوحة">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                                        </span>
-                                                    @endif
-                                                </td>
-                                            @endforeach
-                                        </tr>
-                                    @endforeach
+                                        </div>
+                                    </th>
                                 @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                            </tr>
+                        </thead>
 
-                    {{-- 3. دليل الألوان (لم يتغير) --}}
-                    <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-t-2 border-gray-200 dark:border-gray-600">
-                        <h4 class="font-semibold text-gray-800 dark:text-gray-200 mb-3 text-lg">📌 دليل الألوان</h4>
-                        <div class="flex flex-wrap gap-4 text-sm">
-                            @foreach($roleStyles as $roleName => $style)
-                                @if(isset($style['color']))
-                                    <span class="flex items-center gap-2 px-3 py-1 rounded-full {{ $style['label_color'] }} border border-{{ $style['color'] }}-300 dark:border-{{ $style['color'] }}-700 font-medium">
-                                        <span class="w-3 h-3 rounded-full bg-{{ $style['color'] }}-600 shadow-md"></span>
-                                        <span>{{ $roleLabels[$roleName] ?? $roleName }}</span>
-                                    </span>
-                                @endif
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-800">
+                            @foreach($groupedPermissions as $group => $perms)
+                                {{-- Section Header: iOS Grouped List Style --}}
+                                <tr class="bg-gray-50/50 dark:bg-white/5">
+                                    <td colspan="{{ $roles->count() + 1 }}" class="px-8 py-3">
+                                        <span class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                                            {{ $group }}
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                @foreach($perms as $permission)
+                                    <tr class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors duration-200">
+                                        <td class="px-8 py-4 text-sm font-medium text-gray-700 dark:text-gray-200">
+                                            {{ $permissionLabels[$permission->name] ?? $permission->name }}
+                                        </td>
+                                        @foreach($roles as $role)
+                                            <td class="px-4 py-4 text-center">
+                                                @if($role->hasPermissionTo($permission->name))
+                                                    {{-- Apple Style Checkmark: Simple, Blue, Clean --}}
+                                                    <div class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 mx-auto">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                                    </div>
+                                                @else
+                                                    {{-- Empty State: Subtle Dot --}}
+                                                    <div class="inline-flex items-center justify-center w-8 h-8 mx-auto">
+                                                        <div class="w-1.5 h-1.5 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                        @endforeach
+                                    </tr>
+                                @endforeach
                             @endforeach
-                        </div>
-                    </div>
-
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-
+            </section>
         </div>
     </div>
 </x-app-layout>
