@@ -9,20 +9,29 @@ use Illuminate\Http\Request;
 class EmployeeController extends Controller
 {
     // عرض قائمة الموظفين
-    public function index(Request $request)
-    {
-        $departmentId = $request->get('department_id');
-        $departments = Department::where('is_active', true)->get();
-        
-        $employees = Employee::with('department')
-            ->when($departmentId, function ($query) use ($departmentId) {
-                $query->where('department_id', $departmentId);
-            })
-            ->orderByDesc('created_at')
-            ->paginate(20);
+public function index(Request $request)
+{
+    $query = $request->get('q', '');
+    $departmentId = $request->get('department_id', '');
 
-        return view('employees.index', compact('employees', 'departments', 'departmentId'));
-    }
+    $employees = Employee::with('department')
+        ->when($query, function($q) use ($query) {
+            $q->where(function($q2) use ($query) {
+                $q2->where('name', 'like', "%{$query}%")
+                   ->orWhere('employee_number', 'like', "%{$query}%");
+            });
+        })
+        ->when($departmentId, function($q) use ($departmentId) {
+            $q->where('department_id', $departmentId);
+        })
+        ->orderBy('employee_number')
+        ->paginate(20)
+        ->withQueryString();
+
+    $departments = Department::where('is_active', true)->get();
+
+    return view('employees.index', compact('employees', 'departments', 'query', 'departmentId'));
+}
 
     // صفحة إضافة موظف
     public function create()

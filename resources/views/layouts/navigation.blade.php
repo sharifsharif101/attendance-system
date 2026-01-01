@@ -77,7 +77,7 @@
 
                     @can('users.manage')
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                        المستخدمين
+                        مستخدمين النظام
                     </x-nav-link>
                     @endcan
                 @can('roles.manage')

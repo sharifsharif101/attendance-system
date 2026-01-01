@@ -14,7 +14,7 @@ class Setting extends Model
     // جلب قيمة إعداد
     public static function get($key, $default = null)
     {
-        $setting = self::where('key', $key)->first();
+        $setting = static::where('key', $key)->first();
         return $setting ? $setting->value : $default;
     }
 

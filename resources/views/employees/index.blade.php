@@ -19,26 +19,44 @@
             
 
                     {{-- فلترة حسب القسم --}}
-                    <form method="GET" action="{{ route('employees.index') }}" class="mb-6">
-                        <div class="flex gap-4 items-end">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">القسم</label>
-                                <select name="department_id" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm">
-                                    <option value="">كل الأقسام</option>
-                                    @foreach($departments as $department)
-                                        <option value="{{ $department->id }}" 
-                                            {{ $departmentId == $department->id ? 'selected' : '' }}>
-                                            {{ $department->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <button type="submit" 
-                                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                                فلترة
-                            </button>
-                        </div>
-                    </form>
+            {{-- البحث والفلترة --}}
+<form method="GET" action="{{ route('employees.index') }}" class="mb-6">
+    <div class="flex flex-wrap gap-4 items-end">
+        <div class="flex-1 min-w-64">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">🔍 البحث</label>
+            <input type="text" name="q" value="{{ $query }}" 
+                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm"
+                placeholder="ابحث بالاسم أو الرقم الوظيفي...">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">القسم</label>
+            <select name="department_id" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm">
+                <option value="">كل الأقسام</option>
+                @foreach($departments as $department)
+                    <option value="{{ $department->id }}" 
+                        {{ $departmentId == $department->id ? 'selected' : '' }}>
+                        {{ $department->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" 
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                🔍 بحث
+            </button>
+            <a href="{{ route('employees.index') }}" 
+                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                ↺ إعادة
+            </a>
+        </div>
+    </div>
+</form>
+
+{{-- عدد النتائج --}}
+<div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
+    إجمالي النتائج: {{ $employees->total() }}
+</div>
 
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">

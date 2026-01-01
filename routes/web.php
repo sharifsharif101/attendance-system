@@ -13,12 +13,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EmployeeReportController;
+use App\Http\Controllers\WelcomeController;
 
 
 
 Route::get('/', function () {
-    return redirect()->route('dashboard');
+    return redirect()->route('welcome');
 });
+
+Route::get('/welcome', [WelcomeController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('welcome');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])
@@ -57,9 +62,13 @@ Route::middleware('auth')->group(function () {
         ->name('attendance.unlock');
 
     // سجل التدقيق
-    Route::get('/audit', [AuditController::class, 'index'])
-        ->middleware('permission:audit.view')
-        ->name('audit.index');
+Route::get('/audit', [AuditController::class, 'index'])
+    ->middleware('permission:audit.view')
+    ->name('audit.index');
+
+Route::get('/audit/{activity}', [AuditController::class, 'show'])
+    ->middleware('permission:audit.view')
+    ->name('audit.show');
 
     // التقارير
     Route::get('/reports/daily', [ReportController::class, 'daily'])
