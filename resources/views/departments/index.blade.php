@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 إدارة الأقسام
             </h2>
             <a href="{{ route('departments.create') }}" 
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
                 + إضافة قسم
             </a>
         </div>
@@ -18,6 +18,7 @@
 
                   <x-alert />
 
+                    <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
@@ -64,6 +65,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
 
                 </div>
             </div>

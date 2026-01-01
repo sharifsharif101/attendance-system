@@ -166,6 +166,72 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @can('attendance.view')
+            <x-responsive-nav-link :href="route('attendance.index')" :active="request()->routeIs('attendance.*')">
+                الحضور
+            </x-responsive-nav-link>
+            @endcan
+
+            @can('audit.view')
+            <x-responsive-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.*')">
+                سجل التدقيق
+            </x-responsive-nav-link>
+            @endcan
+
+            @can('reports.view')
+            <div class="border-t border-gray-200 dark:border-gray-600 mt-2 pt-2">
+                <div class="px-4 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">التقارير</div>
+                <x-responsive-nav-link :href="route('reports.daily')" :active="request()->routeIs('reports.daily')">
+                    📅 تقرير يومي
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('reports.monthly')" :active="request()->routeIs('reports.monthly')">
+                    📆 تقرير شهري
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('reports.employee.search')" :active="request()->routeIs('reports.employee.search') || request()->routeIs('employee.report')">
+                    🔍 تقرير موظف
+                </x-responsive-nav-link>
+            </div>
+            @endcan
+
+            @can('users.manage')
+            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                مستخدمين النظام
+            </x-responsive-nav-link>
+            @endcan
+
+            @can('roles.manage')
+            <x-responsive-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')">
+                الأدوار
+            </x-responsive-nav-link>
+            @endcan
+
+            @can('departments.manage')
+            <x-responsive-nav-link :href="route('departments.index')" :active="request()->routeIs('departments.*')">
+                الأقسام
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
+                الموظفين
+            </x-responsive-nav-link>
+            @endcan
+
+            @can('users.manage')
+            <x-responsive-nav-link :href="route('statuses.index')" :active="request()->routeIs('statuses.*')">
+                حالات الحضور
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('settings.index')" :active="request()->routeIs('settings.*')">
+                الإعدادات
+            </x-responsive-nav-link>
+            @endcan
+
+            <!-- Dark Mode Toggle -->
+            <div class="px-4 py-2">
+                <button onclick="toggleDarkMode()" 
+                    class="w-full flex items-center justify-center px-3 py-2 rounded-md text-sm font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <span id="darkModeIconMobile">🌙</span>
+                    <span class="mr-2">تبديل الوضع</span>
+                </button>
+            </div>
         </div>
 
         <!-- Responsive Settings Options -->

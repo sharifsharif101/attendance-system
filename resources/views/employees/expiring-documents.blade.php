@@ -1,11 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 ⚠️ تقرير الوثائق المنتهية والمنتهية قريباً
             </h2>
             <button onclick="window.print()"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded print:hidden">
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded print:hidden text-center">
                 🖨️ طباعة
             </button>
         </div>

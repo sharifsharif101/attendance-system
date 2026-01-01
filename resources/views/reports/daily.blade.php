@@ -12,7 +12,7 @@
 
                     {{-- فلترة --}}
                     <form method="GET" action="{{ route('reports.daily') }}" class="mb-6">
-                        <div class="flex flex-row gap-4 items-end">
+                        <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">التاريخ</label>
                                 <input type="date" name="date" value="{{ $date }}" 
@@ -51,6 +51,7 @@
                         </div>
 
                         {{-- جدول التفاصيل --}}
+                        <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
@@ -91,6 +92,7 @@
                                 @endforelse
                             </tbody>
                         </table>
+                        </div>
                     @else
                         <p class="text-gray-500 dark:text-gray-400">اختر القسم واضغط عرض التقرير</p>
                     @endif

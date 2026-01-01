@@ -12,7 +12,7 @@
 
                     {{-- فلترة --}}
                     <form method="GET" action="{{ route('reports.monthly') }}" class="mb-6">
-                        <div class="flex flex-row gap-4 items-end">
+                        <div class="flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الشهر</label>
                                 <input type="month" name="month" value="{{ $month }}" 

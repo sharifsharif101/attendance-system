@@ -8,18 +8,18 @@
             <div class="flex-1 p-6 lg:p-10">
                 
                 {{-- الهيدر: بسيط ونظيف --}}
-                <div class="flex items-end justify-between mb-10">
-                    <div>
+                <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+                    <div class="text-center sm:text-right">
                         <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">
                             {{ now()->translatedFormat('l، d F') }}
                         </p>
-                        <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                        <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
                             مرحباً، {{ Auth::user()->name }}
                         </h1>
                     </div>
                     
                     {{-- زر الإجراءات السريعة (تصميم زر Apple) --}}
-                    <div>
+                    <div class="flex justify-center sm:justify-end">
                         <button class="bg-gray-900 dark:bg-white dark:text-black text-white px-5 py-2.5 rounded-full text-sm font-medium hover:scale-105 transition-transform duration-200 shadow-lg shadow-gray-200 dark:shadow-none flex items-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             <span>إجراء جديد</span>
