@@ -84,6 +84,7 @@ class EmployeeReportController extends Controller
         // حساب أيام العمل (استبعاد الإجازات الأسبوعية)
         $weekendDays = MonthlySetting::getWeekendDays($month);
         $workingDays = 0;
+        $workingDates = []; // لتخزين تواريخ أيام العمل
         $currentDate = $startDate->copy();
         
         while ($currentDate <= $endDate) {
@@ -92,6 +93,7 @@ class EmployeeReportController extends Controller
             
             if (!in_array($dayMap[$dayOfWeek], $weekendDays)) {
                 $workingDays++;
+                $workingDates[] = $currentDate->format('Y-m-d');
             }
             $currentDate->addDay();
         }
@@ -102,11 +104,21 @@ class EmployeeReportController extends Controller
             $presentDays += $summary[$code]['count'] ?? 0;
         }
         
-        // حساب الأيام المستثناة
+        // حساب الأيام المستثناة (فقط في أيام العمل)
         $excludedDays = 0;
+        
         foreach ($excludedStatusCodes as $code) {
-            $excludedDays += $summary[$code]['count'] ?? 0;
+            $excludedRecords = $records->where('status', $code);
+            
+            foreach ($excludedRecords as $record) {
+                // تحويل التاريخ إلى صيغة Y-m-d للمقارنة
+                $recordDate = \Carbon\Carbon::parse($record->date)->format('Y-m-d');
+                if (in_array($recordDate, $workingDates)) {
+                    $excludedDays++;
+                }
+            }
         }
+
         
         // حساب نسبة الانضباط (مع استثناء الإجازات)
         $effectiveWorkingDays = $workingDays - $excludedDays;
@@ -165,9 +177,10 @@ class EmployeeReportController extends Controller
                 ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
                 ->get();
 
-            // حساب أيام العمل
+            // حساب أيام العمل وبناء قائمة تواريخ أيام العمل
             $weekendDays = MonthlySetting::getWeekendDays($month);
             $workingDays = 0;
+            $workingDates = [];
             $currentDate = $startDate->copy();
             
             while ($currentDate <= $endDate) {
@@ -176,6 +189,7 @@ class EmployeeReportController extends Controller
                 
                 if (!in_array($dayMap[$dayOfWeek], $weekendDays)) {
                     $workingDays++;
+                    $workingDates[] = $currentDate->format('Y-m-d');
                 }
                 $currentDate->addDay();
             }
@@ -186,10 +200,18 @@ class EmployeeReportController extends Controller
                 $presentDays += $records->where('status', $code)->count();
             }
             
-            // حساب الأيام المستثناة
+            // حساب الأيام المستثناة (فقط في أيام العمل)
             $excludedDays = 0;
+            
             foreach ($excludedStatusCodes as $code) {
-                $excludedDays += $records->where('status', $code)->count();
+                $excludedRecords = $records->where('status', $code);
+                foreach ($excludedRecords as $record) {
+                    // تحويل التاريخ إلى صيغة Y-m-d للمقارنة
+                    $recordDate = \Carbon\Carbon::parse($record->date)->format('Y-m-d');
+                    if (in_array($recordDate, $workingDates)) {
+                        $excludedDays++;
+                    }
+                }
             }
             
             // حساب نسبة الانضباط
