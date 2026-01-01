@@ -71,10 +71,25 @@
                     
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         {{-- أيام العمل --}}
-                        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <p class="text-3xl font-bold text-blue-500">{{ $workingDays }}</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">أيام العمل</p>
-                        </div>
+                     {{-- أيام العمل --}}
+<div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+    <p class="text-3xl font-bold text-blue-500">{{ $workingDays }}</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400">أيام العمل</p>
+</div>
+
+{{-- الأيام المستثناة --}}
+@if($excludedDays > 0)
+<div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+    <p class="text-3xl font-bold text-purple-500">{{ $excludedDays }}</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400">إجازات (مستثناة)</p>
+</div>
+
+{{-- أيام العمل الفعلية --}}
+<div class="text-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+    <p class="text-3xl font-bold text-indigo-500">{{ $effectiveWorkingDays }}</p>
+    <p class="text-sm text-gray-500 dark:text-gray-400">أيام العمل الفعلية</p>
+</div>
+@endif
                         
                         {{-- نسبة الانضباط --}}
                         <div class="text-center p-4 rounded-lg border
@@ -107,7 +122,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">📅 سجل الحضور التفصيلي</h3>
                     
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <table class="min-w-full divide-y        divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">التاريخ</th>

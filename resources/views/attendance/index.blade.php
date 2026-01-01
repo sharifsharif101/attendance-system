@@ -128,17 +128,34 @@
 
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 mb-4">
                                 <thead class="bg-gray-50 dark:bg-gray-700">
-                                    <tr>
-                                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                                            <input type="checkbox" id="selectAll" 
-                                                class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700"
-                                                {{ $isLocked ? 'disabled' : '' }}>
-                                        </th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الرقم</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الاسم</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الحالة</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">ملاحظات</th>
-                                    </tr>
+                               <tr>
+    <!-- عمود التحديد (لم يتم تغييره) -->
+    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+        <input type="checkbox" id="selectAll" 
+            class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700"
+            {{ $isLocked ? 'disabled' : '' }}>
+    </th>
+
+    <!-- عمود الرقم (رقمي) -->
+    <th onclick="sortTable(this)" data-type="number" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+        الرقم <span class="sort-icon text-gray-400">↕</span>
+    </th>
+
+    <!-- عمود الاسم (نصي) -->
+    <th onclick="sortTable(this)" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+        الاسم <span class="sort-icon text-gray-400">↕</span>
+    </th>
+
+    <!-- عمود الحالة (نصي) -->
+    <th onclick="sortTable(this)" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+        الحالة <span class="sort-icon text-gray-400">↕</span>
+    </th>
+
+    <!-- عمود الملاحظات (نصي) -->
+    <th onclick="sortTable(this)" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+        ملاحظات <span class="sort-icon text-gray-400">↕</span>
+    </th>
+</tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" id="employeesTableBody">
                                     @foreach ($employees as $index => $employee)

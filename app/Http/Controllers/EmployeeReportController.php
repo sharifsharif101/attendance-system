@@ -13,30 +13,31 @@ use Illuminate\Http\Request;
 class EmployeeReportController extends Controller
 {
     public function search(Request $request)
-{
-    $query = $request->get('q', '');
-    $departmentId = $request->get('department_id', '');
-    
-    $employees = Employee::query()
-        ->with('department')
-        ->when($query, function($q) use ($query) {
-            $q->where(function($q2) use ($query) {
-                $q2->where('name', 'like', "%{$query}%")
-                   ->orWhere('employee_number', 'like', "%{$query}%");
-            });
-        })
-        ->when($departmentId, function($q) use ($departmentId) {
-            $q->where('department_id', $departmentId);
-        })
-        ->where('is_active', true)
-        ->orderBy('name')
-        ->limit(50)
-        ->get();
-    
-    $departments = \App\Models\Department::where('is_active', true)->get();
-    
-    return view('reports.search', compact('employees', 'departments', 'query', 'departmentId'));
-}
+    {
+        $query = $request->get('q', '');
+        $departmentId = $request->get('department_id', '');
+        
+        $employees = Employee::query()
+            ->with('department')
+            ->when($query, function($q) use ($query) {
+                $q->where(function($q2) use ($query) {
+                    $q2->where('name', 'like', "%{$query}%")
+                       ->orWhere('employee_number', 'like', "%{$query}%");
+                });
+            })
+            ->when($departmentId, function($q) use ($departmentId) {
+                $q->where('department_id', $departmentId);
+            })
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->limit(50)
+            ->get();
+        
+        $departments = \App\Models\Department::where('is_active', true)->get();
+        
+        return view('reports.search', compact('employees', 'departments', 'query', 'departmentId'));
+    }
+
     public function show(Request $request, Employee $employee)
     {
         // الفترة الزمنية
@@ -57,6 +58,16 @@ class EmployeeReportController extends Controller
 
         // جلب حالات الحضور
         $statuses = AttendanceStatus::getActive();
+        
+        // الحالات التي تُحسب كحضور
+        $presentStatusCodes = AttendanceStatus::where('counts_as_present', true)
+            ->pluck('code')
+            ->toArray();
+        
+        // الحالات المستثناة من الحساب
+        $excludedStatusCodes = AttendanceStatus::where('is_excluded', true)
+            ->pluck('code')
+            ->toArray();
 
         // حساب الإحصائيات
         $summary = [];
@@ -65,6 +76,8 @@ class EmployeeReportController extends Controller
                 'name' => $status->name,
                 'color' => $status->color,
                 'count' => $records->where('status', $status->code)->count(),
+                'counts_as_present' => $status->counts_as_present,
+                'is_excluded' => $status->is_excluded,
             ];
         }
 
@@ -83,9 +96,21 @@ class EmployeeReportController extends Controller
             $currentDate->addDay();
         }
 
-        // حساب نسبة الانضباط
-        $presentDays = ($summary['present']['count'] ?? 0) + ($summary['late']['count'] ?? 0);
-        $attendanceRate = $workingDays > 0 ? round(($presentDays / $workingDays) * 100) : 0;
+        // حساب أيام الحضور (الحالات التي تُحسب كحضور)
+        $presentDays = 0;
+        foreach ($presentStatusCodes as $code) {
+            $presentDays += $summary[$code]['count'] ?? 0;
+        }
+        
+        // حساب الأيام المستثناة
+        $excludedDays = 0;
+        foreach ($excludedStatusCodes as $code) {
+            $excludedDays += $summary[$code]['count'] ?? 0;
+        }
+        
+        // حساب نسبة الانضباط (مع استثناء الإجازات)
+        $effectiveWorkingDays = $workingDays - $excludedDays;
+        $attendanceRate = $effectiveWorkingDays > 0 ? round(($presentDays / $effectiveWorkingDays) * 100) : 0;
 
         // الإحصائيات السنوية
         $yearlyStats = $this->getYearlyStats($employee, Carbon::parse($month)->year);
@@ -96,6 +121,9 @@ class EmployeeReportController extends Controller
             'statuses',
             'summary',
             'workingDays',
+            'excludedDays',
+            'effectiveWorkingDays',
+            'presentDays',
             'attendanceRate',
             'month',
             'startDate',
@@ -107,6 +135,16 @@ class EmployeeReportController extends Controller
     private function getYearlyStats(Employee $employee, $year)
     {
         $stats = [];
+        
+        // الحالات التي تُحسب كحضور
+        $presentStatusCodes = AttendanceStatus::where('counts_as_present', true)
+            ->pluck('code')
+            ->toArray();
+        
+        // الحالات المستثناة من الحساب
+        $excludedStatusCodes = AttendanceStatus::where('is_excluded', true)
+            ->pluck('code')
+            ->toArray();
         
         for ($m = 1; $m <= 12; $m++) {
             $month = sprintf('%d-%02d', $year, $m);
@@ -142,13 +180,28 @@ class EmployeeReportController extends Controller
                 $currentDate->addDay();
             }
 
-            $presentDays = $records->whereIn('status', ['present', 'late'])->count();
-            $attendanceRate = $workingDays > 0 ? round(($presentDays / $workingDays) * 100) : 0;
+            // حساب أيام الحضور
+            $presentDays = 0;
+            foreach ($presentStatusCodes as $code) {
+                $presentDays += $records->where('status', $code)->count();
+            }
+            
+            // حساب الأيام المستثناة
+            $excludedDays = 0;
+            foreach ($excludedStatusCodes as $code) {
+                $excludedDays += $records->where('status', $code)->count();
+            }
+            
+            // حساب نسبة الانضباط
+            $effectiveWorkingDays = $workingDays - $excludedDays;
+            $attendanceRate = $effectiveWorkingDays > 0 ? round(($presentDays / $effectiveWorkingDays) * 100) : 0;
 
             $stats[] = [
                 'month' => $month,
                 'month_name' => $this->getArabicMonth($m),
                 'working_days' => $workingDays,
+                'excluded_days' => $excludedDays,
+                'effective_days' => $effectiveWorkingDays,
                 'present_days' => $presentDays,
                 'absent_days' => $records->where('status', 'absent')->count(),
                 'attendance_rate' => $attendanceRate,

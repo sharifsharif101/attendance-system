@@ -6,17 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttendanceStatus extends Model
 {
-    protected $fillable = [
-        'name',
-        'code',
-        'color',
-        'is_active',
-        'sort_order',
-    ];
+protected $fillable = [
+    'code',
+    'name',
+    'color',
+    'counts_as_present',
+    'is_excluded',
+    'sort_order',
+    'is_active',
+];
 
-    protected $casts = [
-        'is_active' => 'boolean',
-    ];
+ 
+
+  protected $casts = [
+    'counts_as_present' => 'boolean',
+    'is_excluded' => 'boolean',
+    'is_active' => 'boolean',
+];
 
     // جلب الحالات النشطة مرتبة
     public static function getActive()

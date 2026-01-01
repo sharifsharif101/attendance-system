@@ -23,7 +23,19 @@ class DashboardController extends Controller
         $totalDepartments = Department::where('is_active', true)->count();
         $totalUsers = User::count();
         
-   
+        // حالات الحضور مع الألوان
+        $statuses = AttendanceStatus::getActive();
+        
+        // الحالات التي تُحسب كحضور
+        $presentStatusCodes = AttendanceStatus::where('counts_as_present', true)
+            ->pluck('code')
+            ->toArray();
+        
+        // الحالات المستثناة من الحساب
+        $excludedStatusCodes = AttendanceStatus::where('is_excluded', true)
+            ->pluck('code')
+            ->toArray();
+        
         // إحصائيات اليوم
         $todayRecords = AttendanceRecord::where('date', $today)->count();
 
@@ -34,12 +46,24 @@ class DashboardController extends Controller
             ->pluck('count', 'status')
             ->toArray();
 
-$todayPresent = ($todayStats['present'] ?? 0) + ($todayStats['late'] ?? 0);
-$todayAbsent = $todayStats['absent'] ?? 0;
+        // حساب الحضور (الحالات التي تُحسب كحضور)
+        $todayPresent = 0;
+        foreach ($presentStatusCodes as $code) {
+            $todayPresent += $todayStats[$code] ?? 0;
+        }
         
-        // نسبة الحضور اليوم
-        $todayAttendanceRate = $totalEmployees > 0 
-            ? round(($todayPresent / $totalEmployees) * 100) 
+        // حساب المستثنين
+        $todayExcluded = 0;
+        foreach ($excludedStatusCodes as $code) {
+            $todayExcluded += $todayStats[$code] ?? 0;
+        }
+        
+        $todayAbsent = $todayStats['absent'] ?? 0;
+        
+        // نسبة الحضور اليوم (مع استثناء الإجازات)
+        $effectiveEmployees = $totalEmployees - $todayExcluded;
+        $todayAttendanceRate = $effectiveEmployees > 0 
+            ? round(($todayPresent / $effectiveEmployees) * 100) 
             : 0;
         
         // إحصائيات الشهر الحالي
@@ -52,37 +76,38 @@ $todayAbsent = $todayStats['absent'] ?? 0;
             ->pluck('count', 'status')
             ->toArray();
         
-        // حالات الحضور مع الألوان
-        $statuses = AttendanceStatus::getActive();
-        
-        // إحصائيات حسب القسم لهذا الشهر
+        // إحصائيات حسب القسم لهذا اليوم
         $departmentStats = Department::where('is_active', true)
             ->withCount(['employees as total_employees' => function($query) {
                 $query->where('is_active', true);
             }])
-            ->with(['employees' => function($query) use ($startOfMonth, $endOfMonth) {
+            ->with(['employees' => function($query) use ($today) {
                 $query->where('is_active', true)
-                    ->with(['attendanceRecords' => function($q) use ($startOfMonth, $endOfMonth) {
-                        $q->whereBetween('date', [$startOfMonth, $endOfMonth]);
+                    ->with(['attendanceRecords' => function($q) use ($today) {
+                        $q->where('date', $today);
                     }]);
             }])
             ->get()
-            ->map(function($dept) {
+            ->map(function($dept) use ($presentStatusCodes, $excludedStatusCodes) {
                 $presentCount = 0;
-                $totalRecords = 0;
+                $excludedCount = 0;
                 
                 foreach($dept->employees as $emp) {
                     foreach($emp->attendanceRecords as $record) {
-                        $totalRecords++;
-                        if(in_array($record->status, ['present', 'late'])) {
+                        if(in_array($record->status, $presentStatusCodes)) {
                             $presentCount++;
+                        }
+                        if(in_array($record->status, $excludedStatusCodes)) {
+                            $excludedCount++;
                         }
                     }
                 }
                 
-                $dept->attendance_rate = $totalRecords > 0 
-                    ? round(($presentCount / $totalRecords) * 100) 
+                $effectiveTotal = $dept->total_employees - $excludedCount;
+                $dept->attendance_rate = $effectiveTotal > 0 
+                    ? round(($presentCount / $effectiveTotal) * 100) 
                     : 0;
+                $dept->excluded_count = $excludedCount;
                 
                 return $dept;
             });
@@ -93,21 +118,22 @@ $todayAbsent = $todayStats['absent'] ?? 0;
             ->limit(5)
             ->get();
         
-return view('dashboard', compact(
-    'totalEmployees',
-    'totalDepartments', 
-    'totalUsers',
-    'todayRecords',
-    'todayPresent',
-    'todayAbsent',
-    'todayAttendanceRate',
-    'todayStats',
-    'monthlyStats',
-    'statuses',
-    'departmentStats',
-    'recentRecords',
-    'today',
-    'currentMonth'
-));
+        return view('dashboard', compact(
+            'totalEmployees',
+            'totalDepartments', 
+            'totalUsers',
+            'todayRecords',
+            'todayPresent',
+            'todayAbsent',
+            'todayExcluded',
+            'todayAttendanceRate',
+            'todayStats',
+            'monthlyStats',
+            'statuses',
+            'departmentStats',
+            'recentRecords',
+            'today',
+            'currentMonth'
+        ));
     }
 }

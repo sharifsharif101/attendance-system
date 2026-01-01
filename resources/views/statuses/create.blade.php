@@ -41,13 +41,27 @@
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm">
                         </div>
 
-                        <div class="mb-4">
-                            <label class="flex items-center">
-                                <input type="checkbox" name="is_active" value="1" 
-                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700" checked>
-                                <span class="mr-2 text-sm text-gray-700 dark:text-gray-300">مفعّل</span>
-                            </label>
-                        </div>
+                  <div class="mb-4 space-y-3">
+    <label class="flex items-center">
+        <input type="checkbox" name="counts_as_present" value="1" 
+            class="rounded border-gray-300 dark:border-gray-600 text-green-600 shadow-sm dark:bg-gray-700"
+            {{ old('counts_as_present') ? 'checked' : '' }}>
+        <span class="mr-2 text-sm text-gray-700 dark:text-gray-300">✅ يُحسب كحضور (يرفع نسبة الحضور)</span>
+    </label>
+
+    <label class="flex items-center">
+        <input type="checkbox" name="is_excluded" value="1" 
+            class="rounded border-gray-300 dark:border-gray-600 text-purple-600 shadow-sm dark:bg-gray-700"
+            {{ old('is_excluded') ? 'checked' : '' }}>
+        <span class="mr-2 text-sm text-gray-700 dark:text-gray-300">⚪ مستثنى من الحساب (لا يؤثر على النسبة - للإجازات)</span>
+    </label>
+
+    <label class="flex items-center">
+        <input type="checkbox" name="is_active" value="1" 
+            class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700" checked>
+        <span class="mr-2 text-sm text-gray-700 dark:text-gray-300">مفعّل</span>
+    </label>
+</div>
 
                         <div class="flex gap-2">
                             <button type="submit" 

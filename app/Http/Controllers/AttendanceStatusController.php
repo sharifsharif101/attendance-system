@@ -21,25 +21,27 @@ class AttendanceStatusController extends Controller
     }
 
     // حفظ حالة جديدة
-    public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:attendance_statuses,code',
-            'color' => 'required|string|max:7',
-            'sort_order' => 'nullable|integer',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'code' => 'required|string|max:50|unique:attendance_statuses',
+        'name' => 'required|string|max:100',
+        'color' => 'required|string|max:7',
+        'sort_order' => 'required|integer',
+    ]);
 
-        AttendanceStatus::create([
-            'name' => $request->name,
-            'code' => $request->code,
-            'color' => $request->color,
-            'sort_order' => $request->sort_order ?? 0,
-            'is_active' => $request->has('is_active'),
-        ]);
+    AttendanceStatus::create([
+        'code' => $request->code,
+        'name' => $request->name,
+        'color' => $request->color,
+        'sort_order' => $request->sort_order,
+        'counts_as_present' => $request->has('counts_as_present'),
+        'is_excluded' => $request->has('is_excluded'),
+        'is_active' => $request->has('is_active'),
+    ]);
 
-        return redirect()->route('statuses.index')->with('success', 'تم إضافة الحالة بنجاح');
-    }
+    return redirect()->route('statuses.index')->with('success', 'تم إضافة الحالة بنجاح');
+}
 
     // صفحة تعديل حالة
     public function edit(AttendanceStatus $status)
@@ -48,25 +50,27 @@ class AttendanceStatusController extends Controller
     }
 
     // تحديث حالة
-    public function update(Request $request, AttendanceStatus $status)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:attendance_statuses,code,' . $status->id,
-            'color' => 'required|string|max:7',
-            'sort_order' => 'nullable|integer',
-        ]);
+public function update(Request $request, AttendanceStatus $status)
+{
+    $request->validate([
+        'code' => 'required|string|max:50|unique:attendance_statuses,code,' . $status->id,
+        'name' => 'required|string|max:100',
+        'color' => 'required|string|max:7',
+        'sort_order' => 'required|integer',
+    ]);
 
-        $status->update([
-            'name' => $request->name,
-            'code' => $request->code,
-            'color' => $request->color,
-            'sort_order' => $request->sort_order ?? 0,
-            'is_active' => $request->has('is_active'),
-        ]);
+    $status->update([
+        'code' => $request->code,
+        'name' => $request->name,
+        'color' => $request->color,
+        'sort_order' => $request->sort_order,
+        'counts_as_present' => $request->has('counts_as_present'),
+        'is_excluded' => $request->has('is_excluded'),
+        'is_active' => $request->has('is_active'),
+    ]);
 
-        return redirect()->route('statuses.index')->with('success', 'تم تحديث الحالة بنجاح');
-    }
+    return redirect()->route('statuses.index')->with('success', 'تم تحديث الحالة بنجاح');
+}
 
     // حذف حالة
     public function destroy(AttendanceStatus $status)

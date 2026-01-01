@@ -79,6 +79,59 @@
         }, 3000);
     });
 </script>
+
+<script>
+    function sortTable(th) {
+        const table = th.closest('table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const index = th.cellIndex; // استخدام فهرس الخلية الحقيقي لضمان الدقة
+        const type = th.getAttribute('data-type') || 'text';
+        
+        // تحديد الاتجاه
+        const order = th.getAttribute('data-order') === 'asc' ? 'desc' : 'asc';
+        
+        // تحديث الأيقونات
+        table.querySelectorAll('th').forEach(header => {
+            header.setAttribute('data-order', '');
+            const span = header.querySelector('.sort-icon');
+            if(span) span.innerText = '↕';
+        });
+        
+        th.setAttribute('data-order', order);
+        const currentSpan = th.querySelector('.sort-icon');
+        if(currentSpan) currentSpan.innerText = order === 'asc' ? '↑' : '↓';
+
+        rows.sort((rowA, rowB) => {
+            // التحقق من وجود الخلية قبل قراءتها لتجنب الأخطاء
+            const cellA = rowA.cells[index] ? rowA.cells[index].innerText.trim() : '';
+            const cellB = rowB.cells[index] ? rowB.cells[index].innerText.trim() : '';
+
+            if (type === 'number') {
+                // تنظيف الرقم من النصوص وتحويل الأرقام العربية إلى إنجليزية إن وجدت
+                const cleanNumber = (str) => {
+                    return parseFloat(
+                        str.replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)) // تحويل عربي لإنجليزي
+                           .replace(/[^0-9.-]+/g, "") // حذف أي حروف
+                    ) || 0;
+                };
+                
+                const a = cleanNumber(cellA);
+                const b = cleanNumber(cellB);
+                return order === 'asc' ? a - b : b - a;
+            } else {
+                // ترتيب النصوص
+                return order === 'asc' 
+                    ? cellA.localeCompare(cellB, 'ar') 
+                    : cellB.localeCompare(cellA, 'ar');
+            }
+        });
+
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+    }
+</script>
+
 </body>
 
 </html>
