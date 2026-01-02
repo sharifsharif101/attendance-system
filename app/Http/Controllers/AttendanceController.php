@@ -63,8 +63,10 @@ $statuses = AttendanceStatus::getActive();
 
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
+            'department_id' => 'required|exists:departments,id',
             'date' => 'required|date',
             'status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
+            'check_in_time' => 'nullable|date_format:H:i',
         ]);
 
         // التحقق من أن الموظف يتبع للقسم المحدد (حماية أمنية)
