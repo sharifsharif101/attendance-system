@@ -93,10 +93,10 @@ class ReportController extends Controller
             $startDate = $month . '-01';
             $endDate = date('Y-m-t', strtotime($startDate));
 
-            // إذا كان الشهر الحالي، نأخذ حتى اليوم فقط
-            if (Carbon::now()->format('Y-m') == $month) {
-                $endDate = date('Y-m-d');
-            }
+            // إذا كان الشهر الحالي، نأخذ حتى اليوم فقط (تم التعطيل للسماح بالمستقبل)
+            // if (Carbon::now()->format('Y-m') == $month) {
+            //     $endDate = date('Y-m-d');
+            // }
 
             // جلب أيام الإجازة من إعدادات الشهر (عطلة أسبوعية)
             $weekendDays = MonthlySetting::getWeekendDays($month);
@@ -172,9 +172,12 @@ class ReportController extends Controller
                 if ($effectiveWorkingDays < 0) $effectiveWorkingDays = 0;
 
                 // نسبة الانضباط
+                $isFullyExcluded = ($effectiveWorkingDays === 0);
+                
                 $employeeStats['working_days'] = $workingDays;
                 $employeeStats['excluded_days'] = $excludedDays;
                 $employeeStats['effective_working_days'] = $effectiveWorkingDays;
+                $employeeStats['is_fully_excluded'] = $isFullyExcluded;
                 $employeeStats['attendance_rate'] = $effectiveWorkingDays > 0
                     ? round(($presentDays / $effectiveWorkingDays) * 100)
                     : 0;

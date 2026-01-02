@@ -61,6 +61,7 @@
                                         @php
                                             $stats = $summary[$employee->id];
                                             $rate = $stats['attendance_rate'];
+                                            $isFullyExcluded = $stats['is_fully_excluded'] ?? false;
                                         @endphp
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
@@ -84,13 +85,19 @@
                                                 </td>
                                             @endforeach
                                             <td class="px-4 py-4 text-center">
-                                                <span class="px-3 py-1 rounded text-white font-bold
-                                                    @if($rate >= 90) bg-green-500
-                                                    @elseif($rate >= 70) bg-yellow-500
-                                                    @else bg-red-500
-                                                    @endif">
-                                                    {{ $rate }}%
-                                                </span>
+                                                @if($isFullyExcluded)
+                                                    <span class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-sm" title="إجازة مستثناة بالكامل">
+                                                        N/A
+                                                    </span>
+                                                @else
+                                                    <span class="px-3 py-1 rounded text-white font-bold
+                                                        @if($rate >= 90) bg-green-500
+                                                        @elseif($rate >= 70) bg-yellow-500
+                                                        @else bg-red-500
+                                                        @endif">
+                                                        {{ $rate }}%
+                                                    </span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach

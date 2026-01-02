@@ -45,10 +45,10 @@ class EmployeeReportController extends Controller
         $startDate = Carbon::parse($month)->startOfMonth();
         $endDate = Carbon::parse($month)->endOfMonth();
         
-        // إذا كان الشهر الحالي، نأخذ حتى اليوم فقط
-        if ($endDate->isFuture()) {
-            $endDate = Carbon::today();
-        }
+        // لا نقيد تاريخ الانتهاء باليوم الحالي إذا كان المستخدم يستعرض شهراً مستقبلياً أو كاملاً
+        // if ($endDate->isFuture()) {
+        //     $endDate = Carbon::today();
+        // }
 
         // جلب سجلات الحضور للموظف
         $records = AttendanceRecord::where('employee_id', $employee->id)
@@ -136,7 +136,8 @@ class EmployeeReportController extends Controller
         $effectiveWorkingDays = $workingDays - $excludedDays;
         
         // التحقق مما إذا كان الشهر مستثنى بالكامل (يوجد أيام عمل لكن كلها مستثناة)
-        $isFullyExcluded = ($workingDays > 0 && $effectiveWorkingDays === 0);
+        // أو لا توجد أيام عمل أصلاً (مثل شهر كامل عطلة)
+        $isFullyExcluded = ($effectiveWorkingDays === 0);
         
         $attendanceRate = $effectiveWorkingDays > 0 ? round(($presentDays / $effectiveWorkingDays) * 100) : 0;
 
@@ -187,10 +188,10 @@ class EmployeeReportController extends Controller
                 continue;
             }
 
-            // إذا كان الشهر الحالي
-            if ($endDate->isFuture()) {
-                $endDate = Carbon::today();
-            }
+            // لا نقيد تاريخ الانتهاء باليوم الحالي للسماح باستعراض التوقعات المستقبلية
+            // if ($endDate->isFuture()) {
+            //     $endDate = Carbon::today();
+            // }
 
             $records = AttendanceRecord::where('employee_id', $employee->id)
                 ->whereBetween('date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
@@ -242,7 +243,7 @@ class EmployeeReportController extends Controller
             $effectiveWorkingDays = $workingDays - $excludedDays;
             $attendanceRate = $effectiveWorkingDays > 0 ? round(($presentDays / $effectiveWorkingDays) * 100) : 0;
             
-            $isFullyExcluded = ($workingDays > 0 && $effectiveWorkingDays === 0);
+            $isFullyExcluded = ($effectiveWorkingDays === 0);
 
             $stats[] = [
                 'month' => $month,
