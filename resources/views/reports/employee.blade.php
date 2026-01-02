@@ -69,6 +69,23 @@
                         📊 ملخص شهر {{ \Carbon\Carbon::parse($month)->translatedFormat('F Y') }}
                     </h3>
                     
+                    @if(isset($isFullyExcluded) && $isFullyExcluded)
+                        <div class="bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="mr-3">
+                                    <p class="text-sm text-yellow-700 dark:text-yellow-200">
+                                        ⚠️ الموظف في إجازة مستثناة طوال الشهر، نسبة الحضور لا تنطبق (N/A).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                    
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         {{-- أيام العمل --}}
                      {{-- أيام العمل --}}
@@ -93,15 +110,19 @@
                         
                         {{-- نسبة الانضباط --}}
                         <div class="text-center p-4 rounded-lg border
-                            @if($attendanceRate >= 90) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800
+                            @if(isset($isFullyExcluded) && $isFullyExcluded) bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600
+                            @elseif($attendanceRate >= 90) bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800
                             @elseif($attendanceRate >= 70) bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800
                             @else bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800
                             @endif">
                             <p class="text-3xl font-bold 
-                                @if($attendanceRate >= 90) text-green-500
+                                @if(isset($isFullyExcluded) && $isFullyExcluded) text-gray-500 dark:text-gray-400
+                                @elseif($attendanceRate >= 90) text-green-500
                                 @elseif($attendanceRate >= 70) text-yellow-500
                                 @else text-red-500
-                                @endif">{{ $attendanceRate }}%</p>
+                                @endif">
+                                {{ (isset($isFullyExcluded) && $isFullyExcluded) ? 'N/A' : $attendanceRate . '%' }}
+                            </p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">نسبة الانضباط</p>
                         </div>
 
@@ -205,13 +226,19 @@
                                             {{ $stat['absent_days'] }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-center">
-                                            <span class="px-3 py-1 rounded text-white font-bold text-sm
-                                                @if($stat['attendance_rate'] >= 90) bg-green-500
-                                                @elseif($stat['attendance_rate'] >= 70) bg-yellow-500
-                                                @else bg-red-500
-                                                @endif">
-                                                {{ $stat['attendance_rate'] }}%
-                                            </span>
+                                            @if($stat['is_fully_excluded'])
+                                                <span class="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-sm" title="إجازة مستثناة بالكامل">
+                                                    N/A
+                                                </span>
+                                            @else
+                                                <span class="px-3 py-1 rounded text-white font-bold text-sm
+                                                    @if($stat['attendance_rate'] >= 90) bg-green-500
+                                                    @elseif($stat['attendance_rate'] >= 70) bg-yellow-500
+                                                    @else bg-red-500
+                                                    @endif">
+                                                    {{ $stat['attendance_rate'] }}%
+                                                </span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

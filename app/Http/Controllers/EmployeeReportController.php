@@ -134,6 +134,10 @@ class EmployeeReportController extends Controller
         
         // حساب نسبة الانضباط (مع استثناء الإجازات)
         $effectiveWorkingDays = $workingDays - $excludedDays;
+        
+        // التحقق مما إذا كان الشهر مستثنى بالكامل (يوجد أيام عمل لكن كلها مستثناة)
+        $isFullyExcluded = ($workingDays > 0 && $effectiveWorkingDays === 0);
+        
         $attendanceRate = $effectiveWorkingDays > 0 ? round(($presentDays / $effectiveWorkingDays) * 100) : 0;
 
         // الإحصائيات السنوية
@@ -152,7 +156,10 @@ class EmployeeReportController extends Controller
             'month',
             'startDate',
             'endDate',
-            'yearlyStats'
+            'startDate',
+            'endDate',
+            'yearlyStats',
+            'isFullyExcluded'
         ));
     }
 
@@ -234,6 +241,8 @@ class EmployeeReportController extends Controller
             // حساب نسبة الانضباط
             $effectiveWorkingDays = $workingDays - $excludedDays;
             $attendanceRate = $effectiveWorkingDays > 0 ? round(($presentDays / $effectiveWorkingDays) * 100) : 0;
+            
+            $isFullyExcluded = ($workingDays > 0 && $effectiveWorkingDays === 0);
 
             $stats[] = [
                 'month' => $month,
@@ -243,7 +252,9 @@ class EmployeeReportController extends Controller
                 'effective_days' => $effectiveWorkingDays,
                 'present_days' => $presentDays,
                 'absent_days' => $records->where('status', 'absent')->count(),
+                'absent_days' => $records->where('status', 'absent')->count(),
                 'attendance_rate' => $attendanceRate,
+                'is_fully_excluded' => $isFullyExcluded,
             ];
         }
 

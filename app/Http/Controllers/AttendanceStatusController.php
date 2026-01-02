@@ -67,11 +67,13 @@ public function update(Request $request, AttendanceStatus $status)
         // حفظ القيم القديمة قبل التحديث
         $oldIsExcluded = $status->is_excluded;
         $oldCountsAsPresent = $status->counts_as_present;
+        $oldCode = $status->code; // Capture old code
         
         // معالجة القيم البوليانية بشكل صحيح حتى مع JSON
         $newIsExcluded = $request->boolean('is_excluded');
         $newCountsAsPresent = $request->boolean('counts_as_present');
         $isActive = $request->boolean('is_active');
+        $newCode = $request->code;
 
         // في حال كان النموذج HTML تقليدي (checkboxes)، إذا لم يكن موجوداً فهو false
         // ولكن $request->boolean() يعالج الحالتين (وجود المفتاح كـ "on"/"1"/true أو عدم وجوده كـ false)
@@ -88,6 +90,12 @@ public function update(Request $request, AttendanceStatus $status)
                 'new_counts_as_present' => $newCountsAsPresent,
                 'changed_by' => Auth::id(),
             ]);
+        }
+
+        // تطبيق التحديث المتتابع (Cascade Update) لإصلاح مشكلة "صانع الأيتام"
+        if ($oldCode !== $newCode) {
+            \App\Models\AttendanceRecord::where('status', $oldCode)
+                ->update(['status' => $newCode]);
         }
 
         $status->update([
