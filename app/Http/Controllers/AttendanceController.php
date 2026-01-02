@@ -1,5 +1,5 @@
 <?php
-
+// ختم الجودة
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceRecord;
@@ -48,9 +48,7 @@ $statuses = AttendanceStatus::getActive();
                 }])
                 ->get();
 
-            $isLocked = DayLock::where('date', $date)
-                ->where('department_id', $departmentId)
-                ->exists();
+            $isLocked = $this->isDayLocked($date, $departmentId);
         }
 
     return view('attendance.index', compact('departments', 'employees', 'date', 'departmentId', 'isLocked', 'statuses'));
@@ -59,8 +57,6 @@ $statuses = AttendanceStatus::getActive();
     // حفظ الحضور
     public function store(Request $request)
     {
-            $this->checkDepartmentAccess($request->department_id);
-
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'department_id' => 'required|exists:departments,id',
@@ -68,6 +64,8 @@ $statuses = AttendanceStatus::getActive();
             'status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
             'check_in_time' => 'nullable|date_format:H:i',
         ]);
+
+        $this->checkDepartmentAccess($request->department_id);
 
         // التحقق من أن الموظف يتبع للقسم المحدد (حماية أمنية)
         $employee = Employee::where('id', $request->employee_id)
@@ -79,14 +77,11 @@ $statuses = AttendanceStatus::getActive();
         }
 
         // التحقق من القفل
-        // نستخدم قسم الطلب لأنه تم التحقق من تبعية الموظف له
-        $isLocked = DayLock::where('date', $request->date)
-            ->where('department_id', $request->department_id)
-            ->exists();
-
-        if ($isLocked) {
+        if ($this->isDayLocked($request->date, $request->department_id)) {
             return back()->with('error', 'هذا اليوم مقفل ولا يمكن التعديل');
         }
+
+
 
         // جلب إعدادات الحالة لحفظها مع السجل
         $statusModel = AttendanceStatus::where('code', $request->status)->first();
@@ -111,20 +106,17 @@ $statuses = AttendanceStatus::getActive();
     // التحضير الجماعي
     public function bulkStore(Request $request)
     {
-            $this->checkDepartmentAccess($request->department_id);
-
         $request->validate([
             'department_id' => 'required|exists:departments,id',
             'date' => 'required|date',
             'status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
         ]);
 
-        // التحقق من القفل
-        $isLocked = DayLock::where('date', $request->date)
-            ->where('department_id', $request->department_id)
-            ->exists();
+        $this->checkDepartmentAccess($request->department_id);
 
-        if ($isLocked) {
+        // التحقق من القفل
+        // التحقق من القفل
+        if ($this->isDayLocked($request->date, $request->department_id)) {
             return back()->with('error', 'هذا اليوم مقفل ولا يمكن التعديل');
         }
 
@@ -159,8 +151,6 @@ $statuses = AttendanceStatus::getActive();
     // حفظ الكل دفعة واحدة
     public function storeAll(Request $request)
     {
-            $this->checkDepartmentAccess($request->department_id);
-
         $request->validate([
             'date' => 'required|date',
             'department_id' => 'required|exists:departments,id',
@@ -169,12 +159,10 @@ $statuses = AttendanceStatus::getActive();
             'attendance.*.status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
         ]);
 
-        // التحقق من القفل
-        $isLocked = DayLock::where('date', $request->date)
-            ->where('department_id', $request->department_id)
-            ->exists();
+        $this->checkDepartmentAccess($request->department_id);
 
-        if ($isLocked) {
+         // التحقق من القفل
+        if ($this->isDayLocked($request->date, $request->department_id)) {
             return back()->with('error', 'هذا اليوم مقفل ولا يمكن التعديل');
         }
 
@@ -220,19 +208,16 @@ $statuses = AttendanceStatus::getActive();
     // قفل اليوم
     public function lockDay(Request $request)
     {
-            $this->checkDepartmentAccess($request->department_id);
-
         $request->validate([
             'date' => 'required|date',
             'department_id' => 'required|exists:departments,id',
         ]);
 
-        // التحقق إذا كان مقفل مسبقاً
-        $exists = DayLock::where('date', $request->date)
-            ->where('department_id', $request->department_id)
-            ->exists();
+        $this->checkDepartmentAccess($request->department_id);
 
-        if ($exists) {
+        // التحقق إذا كان مقفل مسبقاً
+        // التحقق إذا كان مقفل مسبقاً
+        if ($this->isDayLocked($request->date, $request->department_id)) {
             return back()->with('error', 'هذا اليوم مقفل مسبقاً');
         }
 
@@ -263,12 +248,12 @@ $statuses = AttendanceStatus::getActive();
     // فتح اليوم
     public function unlockDay(Request $request)
     {
-            $this->checkDepartmentAccess($request->department_id);
-
         $request->validate([
             'date' => 'required|date',
             'department_id' => 'required|exists:departments,id',
         ]);
+
+        $this->checkDepartmentAccess($request->department_id);
 
         $deleted = DayLock::where('date', $request->date)
             ->where('department_id', $request->department_id)
@@ -300,11 +285,16 @@ private function checkDepartmentAccess($departmentId)
     return true;
 }
 
+private function isDayLocked($date, $departmentId)
+{
+    return DayLock::where('date', $date)
+        ->where('department_id', $departmentId)
+        ->exists();
+}
+
 // حفظ جماعي عبر AJAX
 public function ajaxBulkStore(Request $request)
 {
-    $this->checkDepartmentAccess($request->department_id);
-    
     $request->validate([
         'date' => 'required|date',
         'department_id' => 'required|exists:departments,id',
@@ -313,12 +303,11 @@ public function ajaxBulkStore(Request $request)
         'status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
     ]);
 
-    // التحقق من القفل
-    $isLocked = \App\Models\DayLock::where('date', $request->date)
-        ->where('department_id', $request->department_id)
-        ->exists();
+    $this->checkDepartmentAccess($request->department_id);
 
-    if ($isLocked) {
+    // التحقق من القفل
+    // التحقق من القفل
+    if ($this->isDayLocked($request->date, $request->department_id)) {
         return response()->json([
             'success' => false,
             'message' => 'هذا اليوم مقفل'
@@ -333,6 +322,7 @@ public function ajaxBulkStore(Request $request)
         // حماية أمنية: جلب الموظفين الذين ينتمون فعلاً للقسم المحدد
         $validEmployees = Employee::where('department_id', $request->department_id)
             ->whereIn('id', $request->employee_ids)
+            ->where('is_active', true)
             ->get();
 
         foreach ($validEmployees as $employee) {
