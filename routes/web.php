@@ -79,7 +79,7 @@ Route::get('/audit/{activity}', [AuditController::class, 'show'])
         ->middleware('permission:reports.view')
         ->name('reports.monthly');
 
-    // الإعدادات
+    // Settings
     Route::get('/settings', [SettingController::class, 'index'])
         ->middleware('permission:users.manage')
         ->name('settings.index');
@@ -88,6 +88,9 @@ Route::get('/audit/{activity}', [AuditController::class, 'show'])
         ->middleware('permission:users.manage')
         ->name('settings.update');
 
+    Route::resource('settings/holidays', \App\Http\Controllers\OfficialHolidayController::class);
+    
+    // Monthly Settings
     Route::post('/settings/month', [SettingController::class, 'updateMonth'])
         ->middleware('permission:users.manage')
         ->name('settings.updateMonth');
@@ -103,6 +106,15 @@ Route::get('/audit/{activity}', [AuditController::class, 'show'])
     // حالات الحضور
     Route::resource('statuses', AttendanceStatusController::class)
         ->middleware('permission:users.manage');
+    
+    // تاريخ تغييرات حالات الحضور
+    Route::get('/statuses-history', [AttendanceStatusController::class, 'history'])
+        ->middleware('permission:users.manage')
+        ->name('statuses.history');
+    
+    Route::get('/statuses/{status}/history', [AttendanceStatusController::class, 'statusHistory'])
+        ->middleware('permission:users.manage')
+        ->name('statuses.status-history');
 
     // إدارة الأقسام
     Route::resource('departments', DepartmentController::class)

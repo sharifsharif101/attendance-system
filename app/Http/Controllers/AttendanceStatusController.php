@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\AttendanceStatus;
+use App\Models\AttendanceStatusHistory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceStatusController extends Controller
 {
@@ -35,9 +38,9 @@ public function store(Request $request)
         'name' => $request->name,
         'color' => $request->color,
         'sort_order' => $request->sort_order,
-        'counts_as_present' => $request->has('counts_as_present'),
-        'is_excluded' => $request->has('is_excluded'),
-        'is_active' => $request->has('is_active'),
+        'counts_as_present' => $request->boolean('counts_as_present'),
+        'is_excluded' => $request->boolean('is_excluded'),
+        'is_active' => $request->boolean('is_active'),
     ]);
 
     return redirect()->route('statuses.index')->with('success', 'تم إضافة الحالة بنجاح');
@@ -59,15 +62,44 @@ public function update(Request $request, AttendanceStatus $status)
         'sort_order' => 'required|integer',
     ]);
 
-    $status->update([
-        'code' => $request->code,
-        'name' => $request->name,
-        'color' => $request->color,
-        'sort_order' => $request->sort_order,
-        'counts_as_present' => $request->has('counts_as_present'),
-        'is_excluded' => $request->has('is_excluded'),
-        'is_active' => $request->has('is_active'),
-    ]);
+    // استخدام Transaction لضمان سلامة البيانات
+    DB::transaction(function () use ($request, $status) {
+        // حفظ القيم القديمة قبل التحديث
+        $oldIsExcluded = $status->is_excluded;
+        $oldCountsAsPresent = $status->counts_as_present;
+        
+        // معالجة القيم البوليانية بشكل صحيح حتى مع JSON
+        $newIsExcluded = $request->boolean('is_excluded');
+        $newCountsAsPresent = $request->boolean('counts_as_present');
+        $isActive = $request->boolean('is_active');
+
+        // في حال كان النموذج HTML تقليدي (checkboxes)، إذا لم يكن موجوداً فهو false
+        // ولكن $request->boolean() يعالج الحالتين (وجود المفتاح كـ "on"/"1"/true أو عدم وجوده كـ false)
+        // ملاحظة: إذا كان الطلب Form submit، الـ checkboxes غير المختارة لا تُرسل، لذا boolean تعيد false وهذا صحيح.
+
+        // تسجيل التغيير في التاريخ إذا تغيرت إعدادات الحساب
+        if ($oldIsExcluded !== $newIsExcluded || $oldCountsAsPresent !== $newCountsAsPresent) {
+            AttendanceStatusHistory::create([
+                'attendance_status_id' => $status->id,
+                'status_code' => $status->code,
+                'old_is_excluded' => $oldIsExcluded,
+                'new_is_excluded' => $newIsExcluded,
+                'old_counts_as_present' => $oldCountsAsPresent,
+                'new_counts_as_present' => $newCountsAsPresent,
+                'changed_by' => Auth::id(),
+            ]);
+        }
+
+        $status->update([
+            'code' => $request->code,
+            'name' => $request->name,
+            'color' => $request->color,
+            'sort_order' => $request->sort_order,
+            'counts_as_present' => $newCountsAsPresent,
+            'is_excluded' => $newIsExcluded,
+            'is_active' => $isActive,
+        ]);
+    });
 
     return redirect()->route('statuses.index')->with('success', 'تم تحديث الحالة بنجاح');
 }
@@ -75,7 +107,38 @@ public function update(Request $request, AttendanceStatus $status)
     // حذف حالة
     public function destroy(AttendanceStatus $status)
     {
+        // التحقق من وجود سجلات مرتبطة بهذه الحالة
+        // ملاحظة: بما أن العلاقة غير معرفة كمفتاح أجنبي في قاعدة البيانات
+        // ونعتمد على تطابق كود الحالة، يجب التحقق يدوياً
+        $exists = \App\Models\AttendanceRecord::where('status', $status->code)->exists();
+
+        if ($exists) {
+            return redirect()->route('statuses.index')
+                ->with('error', 'لا يمكن حذف هذه الحالة لأنها مستخدمة في سجلات الحضور. يمكنك إلغاء تفعيلها بدلاً من ذلك.');
+        }
+
         $status->delete();
         return redirect()->route('statuses.index')->with('success', 'تم حذف الحالة بنجاح');
+    }
+
+    // عرض تاريخ جميع التغييرات
+    public function history()
+    {
+        $history = AttendanceStatusHistory::with(['attendanceStatus', 'changedByUser'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        return view('statuses.history', compact('history'));
+    }
+
+    // عرض تاريخ حالة محددة
+    public function statusHistory(AttendanceStatus $status)
+    {
+        $history = AttendanceStatusHistory::where('attendance_status_id', $status->id)
+            ->with('changedByUser')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        return view('statuses.status-history', compact('status', 'history'));
     }
 }

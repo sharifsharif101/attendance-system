@@ -4,10 +4,16 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 إدارة حالات الحضور
             </h2>
-            <a href="{{ route('statuses.create') }}" 
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
-                + إضافة حالة
-            </a>
+            <div class="flex gap-2">
+                <a href="{{ route('statuses.history') }}" 
+                    class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-center">
+                    📋 سجل التغييرات
+                </a>
+                <a href="{{ route('statuses.create') }}" 
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-center">
+                    + إضافة حالة
+                </a>
+            </div>
         </div>
     </x-slot>
 
@@ -72,6 +78,8 @@
                     @endif
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <a href="{{ route('statuses.status-history', $status) }}" 
+                        class="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300 ml-2" title="سجل التغييرات">📋</a>
                     <a href="{{ route('statuses.edit', $status) }}" 
                         class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 ml-2">تعديل</a>
                     <form method="POST" action="{{ route('statuses.destroy', $status) }}" class="inline" onsubmit="return confirm('هل أنت متأكد؟')">

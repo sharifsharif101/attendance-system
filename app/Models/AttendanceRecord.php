@@ -18,11 +18,15 @@ class AttendanceRecord extends Model
         'check_in_time',
         'notes',
         'recorded_by',
+        'is_excluded_snapshot',
+        'counts_as_present_snapshot',
     ];
 
     protected $casts = [
         'date' => 'date',
         'check_in_time' => 'datetime:H:i',
+        'is_excluded_snapshot' => 'boolean',
+        'counts_as_present_snapshot' => 'boolean',
     ];
 
     // إعدادات سجل التدقيق

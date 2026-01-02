@@ -8,7 +8,9 @@ use App\Models\Department;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\AttendanceStatus;
+
 class AttendanceController extends Controller
 {
     // عرض صفحة التحضير
@@ -62,19 +64,31 @@ $statuses = AttendanceStatus::getActive();
         $request->validate([
             'employee_id' => 'required|exists:employees,id',
             'date' => 'required|date',
-            'status' => 'required|in:present,absent,late,excused,leave',
+            'status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
         ]);
 
+        // التحقق من أن الموظف يتبع للقسم المحدد (حماية أمنية)
+        $employee = Employee::where('id', $request->employee_id)
+            ->where('department_id', $request->department_id)
+            ->first();
+
+        if (!$employee) {
+            return back()->with('error', 'الموظف غير موجود في هذا القسم أو ليس لديك صلاحية عليه');
+        }
+
         // التحقق من القفل
-        $employee = Employee::findOrFail($request->employee_id);
+        // نستخدم قسم الطلب لأنه تم التحقق من تبعية الموظف له
         $isLocked = DayLock::where('date', $request->date)
-            ->where('department_id', $employee->department_id)
+            ->where('department_id', $request->department_id)
             ->exists();
 
         if ($isLocked) {
             return back()->with('error', 'هذا اليوم مقفل ولا يمكن التعديل');
         }
 
+        // جلب إعدادات الحالة لحفظها مع السجل
+        $statusModel = AttendanceStatus::where('code', $request->status)->first();
+        
         AttendanceRecord::updateOrCreate(
             [
                 'employee_id' => $request->employee_id,
@@ -85,6 +99,8 @@ $statuses = AttendanceStatus::getActive();
                 'check_in_time' => $request->check_in_time,
                 'notes' => $request->notes,
                 'recorded_by' => Auth::id(),
+                'is_excluded_snapshot' => $statusModel?->is_excluded ?? false,
+                'counts_as_present_snapshot' => $statusModel?->counts_as_present ?? false,
             ]
         );
 
@@ -98,7 +114,7 @@ $statuses = AttendanceStatus::getActive();
         $request->validate([
             'department_id' => 'required|exists:departments,id',
             'date' => 'required|date',
-            'status' => 'required|in:present,absent,late,excused,leave',
+            'status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
         ]);
 
         // التحقق من القفل
@@ -110,25 +126,32 @@ $statuses = AttendanceStatus::getActive();
             return back()->with('error', 'هذا اليوم مقفل ولا يمكن التعديل');
         }
 
-        // جلب موظفين القسم
-        $employees = Employee::where('department_id', $request->department_id)
-            ->where('is_active', true)
-            ->get();
+        return DB::transaction(function () use ($request) {
+            // جلب موظفين القسم
+            $employees = Employee::where('department_id', $request->department_id)
+                ->where('is_active', true)
+                ->get();
 
-        foreach ($employees as $employee) {
-            AttendanceRecord::updateOrCreate(
-                [
-                    'employee_id' => $employee->id,
-                    'date' => $request->date,
-                ],
-                [
-                    'status' => $request->status,
-                    'recorded_by' => Auth::id(),
-                ]
-            );
-        }
+            // جلب إعدادات الحالة لحفظها مع السجل
+            $statusModel = AttendanceStatus::where('code', $request->status)->first();
+            
+            foreach ($employees as $employee) {
+                AttendanceRecord::updateOrCreate(
+                    [
+                        'employee_id' => $employee->id,
+                        'date' => $request->date,
+                    ],
+                    [
+                        'status' => $request->status,
+                        'recorded_by' => Auth::id(),
+                        'is_excluded_snapshot' => $statusModel?->is_excluded ?? false,
+                        'counts_as_present_snapshot' => $statusModel?->counts_as_present ?? false,
+                    ]
+                );
+            }
 
-        return back()->with('success', 'تم تحضير ' . $employees->count() . ' موظف بنجاح');
+            return back()->with('success', 'تم تحضير ' . $employees->count() . ' موظف بنجاح');
+        });
     }
 
     // حفظ الكل دفعة واحدة
@@ -141,7 +164,7 @@ $statuses = AttendanceStatus::getActive();
             'department_id' => 'required|exists:departments,id',
             'attendance' => 'required|array',
             'attendance.*.employee_id' => 'required|exists:employees,id',
-    'attendance.*.status' => 'required|string|max:50',
+            'attendance.*.status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
         ]);
 
         // التحقق من القفل
@@ -153,23 +176,44 @@ $statuses = AttendanceStatus::getActive();
             return back()->with('error', 'هذا اليوم مقفل ولا يمكن التعديل');
         }
 
-        $count = 0;
-        foreach ($request->attendance as $record) {
-            AttendanceRecord::updateOrCreate(
-                [
-                    'employee_id' => $record['employee_id'],
-                    'date' => $request->date,
-                ],
-                [
-                    'status' => $record['status'],
-                    'notes' => $record['notes'] ?? null,
-                    'recorded_by' => Auth::id(),
-                ]
-            );
-            $count++;
-        }
+        return DB::transaction(function () use ($request) {
+            $count = 0;
+            // جلب جميع الحالات لاستخدامها
+            $allStatuses = AttendanceStatus::all()->keyBy('code');
 
-        return back()->with('success', 'تم حفظ ' . $count . ' سجل بنجاح');
+            // حماية أمنية: جلب أرقام الموظفين الصالحين في هذا القسم فقط
+            $requestEmployeeIds = collect($request->attendance)->pluck('employee_id')->toArray();
+            $validEmployeeIds = Employee::where('department_id', $request->department_id)
+                ->whereIn('id', $requestEmployeeIds)
+                ->pluck('id')
+                ->toArray();
+            
+            foreach ($request->attendance as $record) {
+                // تخطي الموظفين الذين لا ينتمون للقسم
+                if (!in_array($record['employee_id'], $validEmployeeIds)) {
+                    continue;
+                }
+
+                $statusModel = $allStatuses->get($record['status']);
+                
+                AttendanceRecord::updateOrCreate(
+                    [
+                        'employee_id' => $record['employee_id'],
+                        'date' => $request->date,
+                    ],
+                    [
+                        'status' => $record['status'],
+                        'notes' => $record['notes'] ?? null,
+                        'recorded_by' => Auth::id(),
+                        'is_excluded_snapshot' => $statusModel?->is_excluded ?? false,
+                        'counts_as_present_snapshot' => $statusModel?->counts_as_present ?? false,
+                    ]
+                );
+                $count++;
+            }
+
+            return back()->with('success', 'تم حفظ ' . $count . ' سجل بنجاح');
+        });
     }
     // قفل اليوم
     public function lockDay(Request $request)
@@ -195,7 +239,8 @@ $statuses = AttendanceStatus::getActive();
         $employeesCount = $department->employees()->where('is_active', true)->count();
         $recordsCount = AttendanceRecord::where('date', $request->date)
             ->whereHas('employee', function ($query) use ($request) {
-                $query->where('department_id', $request->department_id);
+                $query->where('department_id', $request->department_id)
+                      ->where('is_active', true);
             })
             ->count();
 
@@ -263,7 +308,7 @@ public function ajaxBulkStore(Request $request)
         'department_id' => 'required|exists:departments,id',
         'employee_ids' => 'required|array',
         'employee_ids.*' => 'exists:employees,id',
-        'status' => 'required|string',
+        'status' => ['required', \Illuminate\Validation\Rule::exists('attendance_statuses', 'code')->where('is_active', true)],
     ]);
 
     // التحقق من القفل
@@ -278,25 +323,37 @@ public function ajaxBulkStore(Request $request)
         ], 403);
     }
 
-    $count = 0;
-    foreach ($request->employee_ids as $employeeId) {
-        AttendanceRecord::updateOrCreate(
-            [
-                'employee_id' => $employeeId,
-                'date' => $request->date,
-            ],
-            [
-                'status' => $request->status,
-                'recorded_by' => Auth::id(),
-            ]
-        );
-        $count++;
-    }
+    return DB::transaction(function () use ($request) {
+        $count = 0;
+        // جلب إعدادات الحالة لحفظها مع السجل
+        $statusModel = AttendanceStatus::where('code', $request->status)->first();
+        
+        // حماية أمنية: جلب الموظفين الذين ينتمون فعلاً للقسم المحدد
+        $validEmployees = Employee::where('department_id', $request->department_id)
+            ->whereIn('id', $request->employee_ids)
+            ->get();
 
-    return response()->json([
-        'success' => true,
-        'message' => "تم حفظ $count سجل بنجاح",
-        'count' => $count
-    ]);
+        foreach ($validEmployees as $employee) {
+            AttendanceRecord::updateOrCreate(
+                [
+                    'employee_id' => $employee->id,
+                    'date' => $request->date,
+                ],
+                [
+                    'status' => $request->status,
+                    'recorded_by' => Auth::id(),
+                    'is_excluded_snapshot' => $statusModel?->is_excluded ?? false,
+                    'counts_as_present_snapshot' => $statusModel?->counts_as_present ?? false,
+                ]
+            );
+            $count++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم حفظ $count سجل بنجاح",
+            'count' => $count
+        ]);
+    });
 }
 }

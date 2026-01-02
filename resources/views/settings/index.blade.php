@@ -16,6 +16,15 @@
                     <h3 class="text-lg font-semibold mb-4">الإعدادات الافتراضية</h3>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">هذه الإعدادات تُطبق على الأشهر التي ليس لها إعداد خاص</p>
                     
+                    <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-blue-700 dark:text-blue-300">🎉 العطلات الرسمية</h4>
+                            <p class="text-sm text-blue-600 dark:text-blue-400">يمكنك إدارة الأعياد والمناسبات الوطنية التي يتم استثناؤها تلقائياً.</p>
+                        </div>
+                        <a href="{{ route('holidays.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                             إدارة العطلات
+                        </a>
+                    </div>
                     <form method="POST" action="{{ route('settings.update') }}">
                         @csrf
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">

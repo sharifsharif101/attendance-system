@@ -60,11 +60,22 @@ class DashboardController extends Controller
         
         $todayAbsent = $todayStats['absent'] ?? 0;
         
-        // نسبة الحضور اليوم (مع استثناء الإجازات)
+        // نسبة الحضور اليوم (مع استثناء الإجازات والعطلات الرسمية)
+        $isHoliday = \App\Models\OfficialHoliday::isHoliday($today);
+        
+        if ($isHoliday) {
+            // إذا كان اليوم عطلة رسمية، فإن عدد الموظفين المطلوب منهم الحضور هو 0 (إلا من حضر)
+            // لكن لغايات العرض في الداشبورد، يمكننا اعتبار نسبة الحضور 100% أو -
+            // الأفضل: اعتبار أن "Effective Employees" هو 0، وبالتالي النسبة 0 (أو نعالجها في الفيو)
+            // هنا سأقوم بحيلة: إذا كان عطلة، نعتبر المستثنين هم (الكل - الحضور)
+            // أي أن كل من غاب هو "مستثنى" بسبب العطلة
+            $todayExcluded = $totalEmployees - $todayPresent; 
+        }
+
         $effectiveEmployees = $totalEmployees - $todayExcluded;
         $todayAttendanceRate = $effectiveEmployees > 0 
             ? round(($todayPresent / $effectiveEmployees) * 100) 
-            : 0;
+            : ($isHoliday ? 100 : 0); // إذا كان عطلة والكل غاب، نعطي 100% بدلاً من 0
         
         // إحصائيات الشهر الحالي
         $startOfMonth = Carbon::now()->startOfMonth()->format('Y-m-d');

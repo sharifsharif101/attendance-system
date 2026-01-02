@@ -98,8 +98,13 @@ class ReportController extends Controller
                 $endDate = date('Y-m-d');
             }
 
-            // جلب أيام الإجازة من إعدادات الشهر
+            // جلب أيام الإجازة من إعدادات الشهر (عطلة أسبوعية)
             $weekendDays = MonthlySetting::getWeekendDays($month);
+            // جلب العطلات الرسمية
+            $officialHolidays = \App\Models\OfficialHoliday::whereBetween('date', [$startDate, $endDate])
+                ->pluck('date')
+                ->map(fn($d) => $d->format('Y-m-d'))
+                ->toArray();
 
             // حساب أيام العمل
             $start = Carbon::parse($startDate);
@@ -107,10 +112,13 @@ class ReportController extends Controller
             $workingDates = []; // لتخزين تواريخ أيام العمل
 
             while ($start <= $end) {
+                $currentDateStr = $start->format('Y-m-d');
                 $dayName = strtolower($start->format('l'));
-                if (!in_array($dayName, $weekendDays)) {
+                
+                // يوم عمل إذا لم يكن عطلة أسبوعية ولا عطلة رسمية
+                if (!in_array($dayName, $weekendDays) && !in_array($currentDateStr, $officialHolidays)) {
                     $workingDays++;
-                    $workingDates[] = $start->format('Y-m-d');
+                    $workingDates[] = $currentDateStr;
                 }
                 $start->addDay();
             }
@@ -135,18 +143,26 @@ class ReportController extends Controller
                     $statusRecords = $employee->attendanceRecords->where('status', $status->code);
                     $count = $statusRecords->count();
                     $employeeStats[$status->code] = $count;
+                }
 
-                    // حساب أيام الحضور (باستخدام الإعدادات)
-                    if (in_array($status->code, $presentStatusCodes)) {
-                        $presentDays += $count;
+                // حساب أيام الحضور (فقط في أيام العمل لضمان عدم تجاوز 100%)
+                // استخدام counts_as_present_snapshot إذا كان محفوظاً، وإلا الرجوع للجدول
+                foreach ($employee->attendanceRecords as $record) {
+                    if (in_array($record->date->format('Y-m-d'), $workingDates)) {
+                        $countsAsPresent = $record->counts_as_present_snapshot ?? in_array($record->status, $presentStatusCodes);
+                        if ($countsAsPresent) {
+                            $presentDays++;
+                        }
                     }
+                }
 
-                    // حساب الأيام المستثناة (بشرط أن تكون في يوم عمل)
-                    if ($status->is_excluded) {
-                         foreach ($statusRecords as $record) {
-                            if (in_array($record->date, $workingDates)) {
-                                $excludedDays++;
-                            }
+                // حساب الأيام المستثناة (بشرط أن تكون في يوم عمل)
+                // استخدام is_excluded_snapshot إذا كان محفوظاً، وإلا الرجوع للجدول
+                foreach ($employee->attendanceRecords as $record) {
+                    if (in_array($record->date->format('Y-m-d'), $workingDates)) {
+                        $isExcluded = $record->is_excluded_snapshot ?? $statuses->where('code', $record->status)->first()?->is_excluded;
+                        if ($isExcluded) {
+                            $excludedDays++;
                         }
                     }
                 }
