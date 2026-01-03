@@ -29,4 +29,7 @@ jobs:
             php artisan view:clear
             php artisan route:clear
             php artisan optimize:clear
-            sudo systemctl restart php-fpm || sudo systemctl restart php8.2-fpm || sudo service php-fpm restart || true
+            sudo varnishadm "ban req.url ~ /" || true
+            sudo systemctl restart varnish || true
+            sudo systemctl restart php8.5-fpm || sudo systemctl restart php-fpm || true
+            sudo systemctl reload nginx || true
