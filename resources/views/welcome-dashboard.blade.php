@@ -62,13 +62,13 @@
                 
                 {{-- الشارة --}}
                 <span class="inline-block bg-blue-800 text-blue-200 text-xs font-bold px-3 py-1 rounded-full mb-2 border border-blue-500">
-                     أهلاً بعودتك، {{ Auth::user()->name }} 👋
+                     أهلاًسسسسسسسسسسسسسسسسس بعودتك، {{ Auth::user()->name }} 👋
                 </span>
 
                 {{-- العنوان --}}
                 <h1 class="text-5xl lg:text-7xl font-black text-white leading-[1.2]">
                     تحكم سهل <br> 
-                    <span class="text-blue-200">في حضور فddddddddddddddddddddريقك</span>
+                    <span class="text-blue-200">في حضور فريقك</span>
                 </h1>
 
                 {{-- الوصف --}}
