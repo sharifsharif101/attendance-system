@@ -30,7 +30,7 @@
             {{-- الشعار أو العنوان العلوي --}}
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-black text-white mb-2">تسجيل الدخول</h2>
-                <p class="text-blue-200 text-sm">مرحباً بعودتك! الرجsssssssssssssssssssssاء إدخال بياناتك</p>
+                <p class="text-blue-200 text-sm">مرحباً بعودتك! الرجsyyyyyyyyyyyyyyyyyyyyysssاء إدخال بياناتك</p>
             </div>
 
             {{-- البطاقة البيضاء --}}
