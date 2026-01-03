@@ -93,17 +93,14 @@
 
     {{-- بقية الفورم (تذكرني والزر) --}}
     <div class="flex items-center justify-between mt-4">
-        <label for="remember_me" class="inline-flex items-center cursor-pointer group">
-            <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-yellow-500 shadow-sm focus:ring-yellow-500 cursor-pointer" name="remember">
-            <span class="ms-2 text-sm text-gray-600 group-hover:text-gray-900 transition">{{ __('تذكرني') }}</span>
-        </label>
+ 
 
         <!-- @if (Route::has('password.request'))
             <a class="text-sm text-blue-600 hover:text-blue-800 font-semibold transition" href="{{ route('password.request') }}">
                 {{ __('نسيت كلمة المرور؟') }}
             </a>
         @endif -->
-    </div>س
+    </div>  
 
     <div class="pt-2">
         <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-blue-900 bg-yellow-500 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-300 shadow-[0_4px_14px_0_rgba(234,179,8,0.39)]">
