@@ -20,8 +20,13 @@ jobs:
             cd /home/admin/htdocs/77.42.31.34.nip.io
             git pull origin main
             composer install --no-dev --optimize-autoloader
+            chown -R admin:admin .
             php artisan migrate --force
             npm install
             npm run build
-            chown -R admin:admin .
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan view:clear
+            php artisan route:clear
             php artisan optimize:clear
+            sudo systemctl restart php-fpm || sudo systemctl restart php8.2-fpm || sudo service php-fpm restart || true
