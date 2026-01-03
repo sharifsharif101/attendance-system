@@ -68,7 +68,7 @@
                 {{-- العنوان --}}
                 <h1 class="text-5xl lg:text-7xl font-black text-white leading-[1.2]">
                     تحكم سهل <br> 
-                    <span class="text-blue-200">في حضور فريقك</span>
+                    <span class="text-blue-200">في حضور فddddddddddddddddddddريقك</span>
                 </h1>
 
                 {{-- الوصف --}}
