@@ -145,23 +145,15 @@ class ReportController extends Controller
                     $employeeStats[$status->code] = $count;
                 }
 
-                // حساب أيام الحضور (فقط في أيام العمل لضمان عدم تجاوز 100%)
-                // استخدام counts_as_present_snapshot إذا كان محفوظاً، وإلا الرجوع للجدول
+                // حساب أيام الحضور والأيام المستثناة (دمج الحلقتين لمنع الازدواجية)
                 foreach ($employee->attendanceRecords as $record) {
                     if (in_array($record->date->format('Y-m-d'), $workingDates)) {
                         $countsAsPresent = $record->counts_as_present_snapshot ?? in_array($record->status, $presentStatusCodes);
+                        $isExcluded = $record->is_excluded_snapshot ?? $statuses->where('code', $record->status)->first()?->is_excluded;
+
                         if ($countsAsPresent) {
                             $presentDays++;
-                        }
-                    }
-                }
-
-                // حساب الأيام المستثناة (بشرط أن تكون في يوم عمل)
-                // استخدام is_excluded_snapshot إذا كان محفوظاً، وإلا الرجوع للجدول
-                foreach ($employee->attendanceRecords as $record) {
-                    if (in_array($record->date->format('Y-m-d'), $workingDates)) {
-                        $isExcluded = $record->is_excluded_snapshot ?? $statuses->where('code', $record->status)->first()?->is_excluded;
-                        if ($isExcluded) {
+                        } elseif ($isExcluded) {
                             $excludedDays++;
                         }
                     }

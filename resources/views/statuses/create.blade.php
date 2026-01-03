@@ -42,20 +42,40 @@
                         </div>
 
                   <div class="mb-4 space-y-3">
-    <label class="flex items-center">
-        <input type="checkbox" name="counts_as_present" value="1" 
-            class="rounded border-gray-300 dark:border-gray-600 text-green-600 shadow-sm dark:bg-gray-700"
-            {{ old('counts_as_present') ? 'checked' : '' }}>
-        <span class="mr-2 text-sm text-gray-700 dark:text-gray-300">✅ يُحسب كحضور (يرفع نسبة الحضور)</span>
+    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">نوع الحالة وتأثيرها على الحساب</label>
+    
+    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+        <input type="radio" name="type" value="present" 
+            class="h-4 w-4 text-green-600 border-gray-300 focus:ring-green-500 cursor-pointer"
+            {{ old('type') == 'present' ? 'checked' : '' }}>
+        <div class="mr-3">
+            <span class="block text-sm font-medium text-gray-900 dark:text-gray-200">✅ حضور (Attendance)</span>
+            <span class="block text-xs text-gray-500 dark:text-gray-400">يُحسب كحضور ويرفع نسبة الالتزام</span>
+        </div>
     </label>
 
-    <label class="flex items-center">
-        <input type="checkbox" name="is_excluded" value="1" 
-            class="rounded border-gray-300 dark:border-gray-600 text-purple-600 shadow-sm dark:bg-gray-700"
-            {{ old('is_excluded') ? 'checked' : '' }}>
-        <span class="mr-2 text-sm text-gray-700 dark:text-gray-300">⚪ مستثنى من الحساب (لا يؤثر على النسبة - للإجازات)</span>
+    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+        <input type="radio" name="type" value="excluded" 
+            class="h-4 w-4 text-purple-600 border-gray-300 focus:ring-purple-500 cursor-pointer"
+            {{ old('type') == 'excluded' ? 'checked' : '' }}>
+        <div class="mr-3">
+            <span class="block text-sm font-medium text-gray-900 dark:text-gray-200">⚪ استثناء (Exception)</span>
+            <span class="block text-xs text-gray-500 dark:text-gray-400">لا يؤثر على النسبة (مثل: إجازة رسمية، إذن قانوني)</span>
+        </div>
     </label>
 
+    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+        <input type="radio" name="type" value="none" 
+            class="h-4 w-4 text-gray-600 border-gray-300 focus:ring-gray-500 cursor-pointer"
+            {{ old('type') == 'none' || old('type') == '' ? 'checked' : '' }}>
+        <div class="mr-3">
+            <span class="block text-sm font-medium text-gray-900 dark:text-gray-200">❌ غياب (Absence)</span>
+            <span class="block text-xs text-gray-500 dark:text-gray-400">الوضع الافتراضي: يعتبر غياباً ويخفض النسبة</span>
+        </div>
+    </label>
+</div>
+
+<div class="mb-4">
     <label class="flex items-center">
         <input type="checkbox" name="is_active" value="1" 
             class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700" checked>

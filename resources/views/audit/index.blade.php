@@ -1,22 +1,32 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            📋 سجل التدقيق
+            📋 سجل تغييرات النظام
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
-
-                    {{-- فلاتر البحث --}}
-                    <form method="GET" action="{{ route('audit.index') }}" class="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            {{-- المستخدم --}}
+            
+            {{-- فلاتر البحث --}}
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                     <form method="GET" action="{{ route('audit.index') }}">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المستخدم</label>
-                                <select name="user_id" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">بحث بالاسم (موظف)</label>
+                                <div class="flex gap-1">
+                                    <input type="text" name="search_name" value="{{ $searchName ?? '' }}" 
+                                        placeholder="اسم الموظف..."
+                                        class="w-full rounded-r-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm focus:ring-blue-500 focus:border-blue-500">
+                                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-l-md text-sm transition duration-150 ease-in-out">
+                                        بحث
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المستخدم (من قام بالتعديل)</label>
+                                <select name="user_id" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm" onchange="this.form.submit()">
                                     <option value="">الكل</option>
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}" {{ $userId == $user->id ? 'selected' : '' }}>
@@ -25,11 +35,9 @@
                                     @endforeach
                                 </select>
                             </div>
-
-                            {{-- الإجراء --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الإجراء</label>
-                                <select name="event" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">نوع الإجراء</label>
+                                <select name="event" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm" onchange="this.form.submit()">
                                     <option value="">الكل</option>
                                     @foreach($events as $key => $value)
                                         <option value="{{ $key }}" {{ $event == $key ? 'selected' : '' }}>
@@ -38,274 +46,176 @@
                                     @endforeach
                                 </select>
                             </div>
-
-                            {{-- النوع --}}
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">النوع</label>
-                                <select name="subject_type" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm">
-                                    <option value="">الكل</option>
-                                    @foreach($subjectTypes as $key => $value)
-                                        <option value="{{ $key }}" {{ $subjectType == $key ? 'selected' : '' }}>
-                                            {{ $value }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            {{-- من تاريخ --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">من تاريخ</label>
                                 <input type="date" name="date_from" value="{{ $dateFrom }}"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm">
+                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm" onchange="this.form.submit()">
                             </div>
-
-                            {{-- إلى تاريخ --}}
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">إلى تاريخ</label>
-                                <input type="date" name="date_to" value="{{ $dateTo }}"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 shadow-sm text-sm">
-                            </div>
-
-                            {{-- أزرار --}}
-                            <div class="flex items-end gap-2">
-                                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
-                                    🔍 بحث
-                                </button>
-                                <a href="{{ route('audit.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-sm">
-                                    ↺ إعادة
+                            <div class="flex items-end">
+                                <a href="{{ route('audit.index') }}" class="w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded text-sm border border-gray-300 transition">
+                                    إعادة تعيين
                                 </a>
                             </div>
                         </div>
                     </form>
-
-                    {{-- عدد النتائج --}}
-                    <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">
-                        إجمالي السجلات: {{ $activities->total() }}
-                    </div>
-
-                    {{-- جدول السجلات --}}
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الإجراء</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">الوصف</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">المستخدم</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">النوع</th>
-                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">التاريخ</th>
-                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">التفاصيل</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                @forelse($activities as $activity)
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                        {{-- الإجراء --}}
-                                        <td class="px-4 py-4 whitespace-nowrap">
-                                            @if($activity->event == 'created')
-                                                <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded text-xs font-bold">
-                                                    🟢 إنشاء
-                                                </span>
-                                            @elseif($activity->event == 'updated')
-                                                <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 rounded text-xs font-bold">
-                                                    🟡 تعديل
-                                                </span>
-                                            @elseif($activity->event == 'deleted')
-                                                <span class="px-2 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 rounded text-xs font-bold">
-                                                    🔴 حذف
-                                                </span>
-                                            @else
-                                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-300 rounded text-xs font-bold">
-                                                    ⚪ {{ $activity->event }}
-                                                </span>
-                                            @endif
-                                        </td>
-
-                                        {{-- الوصف --}}
-                                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $activity->description }}
-                                        </td>
-
-                                        {{-- المستخدم --}}
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                            {{ $activity->causer?->name ?? 'النظام' }}
-                                        </td>
-
-                                        {{-- النوع --}}
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            @php
-                                                $typeLabels = [
-                                                    'App\Models\AttendanceRecord' => 'سجل حضور',
-                                                    'App\Models\Employee' => 'موظف',
-                                                    'App\Models\Department' => 'قسم',
-                                                    'App\Models\User' => 'مستخدم',
-                                                    'App\Models\AttendanceStatus' => 'حالة حضور',
-                                                ];
-                                            @endphp
-                                            {{ $typeLabels[$activity->subject_type] ?? class_basename($activity->subject_type) }}
-                                        </td>
-
-                                        {{-- التاريخ --}}
-                                        <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                            <div>{{ $activity->created_at->format('Y-m-d') }}</div>
-                                            <div class="text-xs">{{ $activity->created_at->format('H:i:s') }}</div>
-                                            <div class="text-xs text-blue-500">{{ $activity->created_at->diffForHumans() }}</div>
-                                        </td>
-
-                                        {{-- التفاصيل --}}
-                                        <td class="px-4 py-4 whitespace-nowrap text-center">
-                                            <button type="button" 
-                                                onclick="showDetails({{ $activity->id }})"
-                                                class="text-blue-500 hover:text-blue-700 text-sm font-bold">
-                                                🔍 عرض
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
-                                            لا توجد سجلات
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {{-- الترقيم --}}
-                    <div class="mt-4">
-                        {{ $activities->links() }}
-                    </div>
-
                 </div>
             </div>
-        </div>
-    </div>
 
-    {{-- Modal التفاصيل --}}
-    <div id="detailsModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75" onclick="closeModal()"></div>
-            
-            <div class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-auto p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">📋 تفاصيل السجل</h3>
-                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+            {{-- الجدول المحسن --}}
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
+                <div class="overflow-auto rounded-t-lg max-h-[75vh]">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 sticky top-0 z-10 shadow-sm ring-1 ring-gray-200 dark:ring-gray-600">
+                            <tr>
+                                <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider whitespace-nowrap">من قام بالتعديل؟</th>
+                                <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider whitespace-nowrap">ماذا حدث؟</th>
+                                <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider whitespace-nowrap">تفاصيل التغييرات</th>
+                                <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider whitespace-nowrap">متى؟</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                            @forelse($activities as $activity)
+                                @php
+                                    $eventColor = \App\Helpers\AuditHelper::getEventColor($activity->event);
+                                    $subjectSummary = \App\Helpers\AuditHelper::getSubjectSummary($activity);
+                                @endphp
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150 ease-in-out">
+                                    {{-- العمود الأول: المستخدم --}}
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                <div class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                                                    {{ substr($activity->causer?->name ?? 'S', 0, 1) }}
+                                                </div>
+                                            </div>
+                                            <div class="mr-4">
+                                                <div class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                                    {{ $activity->causer?->name ?? 'النظام' }}
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    {{ $activity->causer?->email ?? 'System' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    {{-- العمود الثاني: الحدث والملخص --}}
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-2 h-2 rounded-full bg-{{ $eventColor }}-500"></span>
+                                            <span class="text-sm font-bold text-gray-800 dark:text-gray-200">
+                                                {{ \App\Helpers\AuditHelper::getEventLabel($activity->event) }}
+                                            </span>
+                                        </div>
+                                        <div class="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                                            {{ $subjectSummary }}
+                                        </div>
+                                    </td>
+
+                                    {{-- العمود الثالث: القيم --}}
+                                    <td class="px-6 py-4">
+                                        
+                                        {{-- 1. حالة التعديل (Old -> New) --}}
+                                        @if($activity->event == 'updated' && isset($activity->properties['old']) && isset($activity->properties['attributes']))
+                                            <div class="space-y-1">
+                                                @foreach($activity->properties['attributes'] as $key => $newValue)
+                                                    @php
+                                                        $oldValue = $activity->properties['old'][$key] ?? null;
+                                                    @endphp
+                                                    @if($oldValue != $newValue && !in_array($key, ['updated_at']))
+                                                        <div class="flex items-center justify-between text-sm bg-gray-50 dark:bg-black/20 p-2 rounded border border-gray-100 dark:border-gray-700">
+                                                            <div class="text-gray-500 text-xs font-bold w-1/3">
+                                                                {{ \App\Helpers\AuditHelper::getFieldLabel($key) }}
+                                                            </div>
+                                                            <div class="flex-1 flex flex-col items-stretch justify-center gap-2 dir-ltr">
+                                                                {{-- القيمة القديمة --}}
+                                                                <div class="bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-800 rounded p-2 text-center relative">
+                                                                    <span class="absolute top-1 left-2 text-[10px] text-red-400">من</span>
+                                                                    <span class="text-red-700 dark:text-red-400 line-through decoration-2 decoration-red-500/50 text-sm font-medium">
+                                                                        {{ \App\Helpers\AuditHelper::formatValue($key, $oldValue) ?: '(فارغ)' }}
+                                                                    </span>
+                                                                </div>
+
+                                                                {{-- سهم --}}
+                                                                <div class="flex justify-center -my-1 z-10">
+                                                                    <div class="bg-white dark:bg-gray-800 rounded-full p-1 border border-gray-100 dark:border-gray-700 shadow-sm">
+                                                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
+
+                                                                {{-- القيمة الجديدة --}}
+                                                                <div class="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800 rounded p-2 text-center relative">
+                                                                    <span class="absolute top-1 left-2 text-[10px] text-green-500">إلى</span>
+                                                                    <span class="text-green-700 dark:text-green-400 font-bold text-sm">
+                                                                        {{ \App\Helpers\AuditHelper::formatValue($key, $newValue) }}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        
+                                        {{-- 2. حالة الإنشاء (Created) --}}
+                                        @elseif($activity->event == 'created' && isset($activity->properties['attributes']))
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                                                @foreach($activity->properties['attributes'] as $key => $value)
+                                                    @if(!in_array($key, ['created_at', 'updated_at', 'id', 'employee_id', 'recorded_by']) && $value !== null)
+                                                        <div class="flex items-center justify-between text-xs bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-100 dark:border-green-900/30">
+                                                            <span class="text-gray-500 font-medium">{{ \App\Helpers\AuditHelper::getFieldLabel($key) }}</span>
+                                                            <span class="font-bold text-gray-800 dark:text-gray-200 dir-ltr">
+                                                                {{ \App\Helpers\AuditHelper::formatValue($key, $value) }}
+                                                            </span>
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+
+                                        {{-- 3. حالة الحذف (Deleted) --}}
+                                        @elseif($activity->event == 'deleted' && isset($activity->properties['old']))
+                                             <div class="text-xs text-red-600 bg-red-50 p-2 rounded">
+                                                تم حذف السجل الذي كان حالته: 
+                                                <span class="font-bold">{{ \App\Helpers\AuditHelper::formatValue('status', $activity->properties['old']['status'] ?? '') }}</span>
+                                             </div>
+                                        @else
+                                            <span class="text-gray-400 text-xs italic">لا توجد تفاصيل إضافية</span>
+                                        @endif
+                                    </td>
+
+                                    {{-- العمود الرابع: التوقيت --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <div class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                                            {{ $activity->created_at->format('Y-m-d') }}
+                                        </div>
+                                        <div class="text-xs text-gray-500 dir-ltr">
+                                            {{ $activity->created_at->format('h:i A') }}
+                                        </div>
+                                        <div class="text-xs text-blue-500 mt-1">
+                                            {{ $activity->created_at->diffForHumans() }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                            <span class="text-lg font-medium">لا يوجد سجلات نشاط مطابقة</span>
+                                            <span class="text-sm mt-1">حاول تخفيف الفلترة لرؤية المزيد</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
                 
-                <div id="detailsContent" class="text-gray-900 dark:text-gray-100">
-                    <div class="text-center py-4">جاري التحميل...</div>
+                <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                    {{ $activities->links() }}
                 </div>
             </div>
         </div>
     </div>
-
-    {{-- JavaScript --}}
-    <script>
-        function showDetails(id) {
-            document.getElementById('detailsModal').classList.remove('hidden');
-            document.getElementById('detailsContent').innerHTML = '<div class="text-center py-4">جاري التحميل...</div>';
-            
-            fetch(`/audit/${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    let html = `
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">الإجراء:</span>
-                                    <p class="font-bold">${getEventLabel(data.event)}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">المستخدم:</span>
-                                    <p class="font-bold">${data.causer}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">النوع:</span>
-                                    <p class="font-bold">${data.subject_type}</p>
-                                </div>
-                                <div>
-                                    <span class="text-sm text-gray-500 dark:text-gray-400">التاريخ:</span>
-                                    <p class="font-bold">${data.created_at}</p>
-                                    <p class="text-xs text-blue-500">${data.time_ago}</p>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <span class="text-sm text-gray-500 dark:text-gray-400">الوصف:</span>
-                                <p class="font-bold">${data.description}</p>
-                            </div>
-                    `;
-                    
-                    // التغييرات
-                    if (data.old && data.attributes) {
-                        html += `
-                            <div class="mt-4">
-                                <span class="text-sm text-gray-500 dark:text-gray-400 font-bold">التغييرات:</span>
-                                <div class="mt-2 bg-gray-50 dark:bg-gray-700 rounded-lg p-4 overflow-x-auto">
-                                    <table class="min-w-full text-sm">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-right px-2 py-1 text-gray-500 dark:text-gray-400">الحقل</th>
-                                                <th class="text-right px-2 py-1 text-red-500">القيمة القديمة</th>
-                                                <th class="text-right px-2 py-1 text-green-500">القيمة الجديدة</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                        `;
-                        
-                        for (let key in data.attributes) {
-                            if (data.old[key] !== data.attributes[key]) {
-                                html += `
-                                    <tr>
-                                        <td class="px-2 py-1 font-bold">${key}</td>
-                                        <td class="px-2 py-1 text-red-500">${data.old[key] ?? '-'}</td>
-                                        <td class="px-2 py-1 text-green-500">${data.attributes[key] ?? '-'}</td>
-                                    </tr>
-                                `;
-                            }
-                        }
-                        
-                        html += `
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        `;
-                    } else if (data.attributes) {
-                        html += `
-                            <div class="mt-4">
-                                <span class="text-sm text-gray-500 dark:text-gray-400 font-bold">البيانات:</span>
-                                <div class="mt-2 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                                    <pre class="text-xs overflow-x-auto">${JSON.stringify(data.attributes, null, 2)}</pre>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    
-                    html += '</div>';
-                    document.getElementById('detailsContent').innerHTML = html;
-                })
-                .catch(error => {
-                    document.getElementById('detailsContent').innerHTML = '<div class="text-center py-4 text-red-500">حدث خطأ في تحميل البيانات</div>';
-                });
-        }
-        
-        function closeModal() {
-            document.getElementById('detailsModal').classList.add('hidden');
-        }
-        
-        function getEventLabel(event) {
-            const labels = {
-                'created': '🟢 إنشاء',
-                'updated': '🟡 تعديل',
-                'deleted': '🔴 حذف'
-            };
-            return labels[event] || event;
-        }
-        
-        // إغلاق بـ Escape
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
-        });
-    </script>
 </x-app-layout>

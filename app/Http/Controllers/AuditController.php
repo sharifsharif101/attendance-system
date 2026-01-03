@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+// جودة
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 use App\Models\User;
@@ -16,8 +16,28 @@ class AuditController extends Controller
         $subjectType = $request->get('subject_type');
         $dateFrom = $request->get('date_from');
         $dateTo = $request->get('date_to');
+        $searchName = $request->get('search_name');
 
         $activities = Activity::with(['causer', 'subject'])
+            ->when($searchName, function($q) use ($searchName) {
+                // البحث عن الموظفين بهذا الاسم
+                $employeeIds = \App\Models\Employee::where('name', 'like', "%{$searchName}%")->pluck('id');
+                // البحث عن سجلات الحضور لهؤلاء الموظفين
+                $attendanceRecordIds = \App\Models\AttendanceRecord::whereIn('employee_id', $employeeIds)->pluck('id');
+
+                $q->where(function($query) use ($employeeIds, $attendanceRecordIds) {
+                    // السجل مرتبط بموظف مباشرة
+                    $query->where(function($sub) use ($employeeIds) {
+                        $sub->where('subject_type', 'App\Models\Employee')
+                            ->whereIn('subject_id', $employeeIds);
+                    })
+                    // السجل مرتبط بسجل حضور تابع للموظف
+                    ->orWhere(function($sub) use ($attendanceRecordIds) {
+                        $sub->where('subject_type', 'App\Models\AttendanceRecord')
+                            ->whereIn('subject_id', $attendanceRecordIds);
+                    });
+                });
+            })
             ->when($userId, function($q) use ($userId) {
                 $q->where('causer_id', $userId);
             })
@@ -63,7 +83,8 @@ class AuditController extends Controller
             'event',
             'subjectType',
             'dateFrom',
-            'dateTo'
+            'dateTo',
+            'searchName'
         ));
     }
 

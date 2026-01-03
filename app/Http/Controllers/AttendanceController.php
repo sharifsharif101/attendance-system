@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\AttendanceStatus;
+use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
@@ -51,7 +52,22 @@ $statuses = AttendanceStatus::getActive();
             $isLocked = $this->isDayLocked($date, $departmentId);
         }
 
-    return view('attendance.index', compact('departments', 'employees', 'date', 'departmentId', 'isLocked', 'statuses'));
+        // التحقق من العطلات
+        $month = Carbon::parse($date)->format('Y-m');
+        $weekendDays = \App\Models\MonthlySetting::getWeekendDays($month);
+        $dayName = strtolower(Carbon::parse($date)->format('l'));
+        $isWeekend = in_array($dayName, $weekendDays);
+        
+        $isOfficialHoliday = \App\Models\OfficialHoliday::where('date', $date)->exists();
+        
+        $nonWorkingDayReason = '';
+        if ($isOfficialHoliday) {
+            $nonWorkingDayReason = 'عطلة رسمية';
+        } elseif ($isWeekend) {
+            $nonWorkingDayReason = 'إجازة أسبوعية';
+        }
+
+        return view('attendance.index', compact('departments', 'employees', 'date', 'departmentId', 'isLocked', 'statuses', 'isWeekend', 'isOfficialHoliday', 'nonWorkingDayReason'));
     }
 
     // حفظ الحضور

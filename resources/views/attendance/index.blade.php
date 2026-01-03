@@ -43,6 +43,18 @@
 
                     {{-- حالة القفل --}}
                     @if ($departmentId)
+                        
+                        {{-- تنبيه العطلات --}}
+                        @if (isset($nonWorkingDayReason) && !empty($nonWorkingDayReason))
+                            <div class="bg-blue-100 dark:bg-blue-900 border border-blue-400 dark:border-blue-600 text-blue-700 dark:text-blue-300 px-4 py-3 rounded mb-4 flex items-center gap-2">
+                                <span class="text-xl">ℹ️</span>
+                                <div>
+                                    <span class="font-bold">تنبيه:</span> هذا اليوم مصنف كـ 
+                                    <span class="font-bold underline">{{ $nonWorkingDayReason }}</span>.
+                                    <span class="text-sm block sm:inline">تم تعطيل خيار "غائب" لمنع الأخطاء.</span>
+                                </div>
+                            </div>
+                        @endif
                         @if ($isLocked)
                             <div class="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-600 text-yellow-700 dark:text-yellow-300 px-4 py-3 rounded mb-4 flex justify-between items-center">
                                 <span>🔒 هذا اليوم مقفل - لا يمكن التعديل</span>
@@ -102,15 +114,21 @@
                                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         تطبيق على المحددين (<span id="bulkCount">0</span>):
                                     </span>
-                                    <select id="bulkStatus" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm text-sm">
-                                        @foreach($statuses as $status)
-                                            <option value="{{ $status->code }}" data-color="{{ $status->color }}">
-                                                {{ $status->name }}
-                                            </option>
-                                        @endforeach
+                                    <select id="bulkStatus" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm text-sm"
+                                        @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason)) disabled @endif>
+                                        @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason))
+                                            <option value="" selected>⚠️ يوم عطلة - لا يمكن التسجيل</option>
+                                        @else
+                                            @foreach($statuses as $status)
+                                                <option value="{{ $status->code }}" data-color="{{ $status->color }}">
+                                                    {{ $status->name }}
+                                                </option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                     <button type="button" id="applyBulkBtn"
-                                        class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-sm">
+                                        class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-sm"
+                                        @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason)) disabled @endif>
                                         ✓ تطبيق
                                     </button>
                                     <button type="button" id="clearSelectionBtn"
@@ -184,14 +202,19 @@
                                                         style="background-color: {{ $statuses->firstWhere('code', $record?->status)?->color ?? '#6b7280' }}"></span>
                                               <select name="attendance[{{ $index }}][status]"
     class="status-select rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm text-sm"
-    {{ $isLocked ? 'disabled' : '' }}>
-                                                        @foreach($statuses as $status)
-                                                            <option value="{{ $status->code }}" 
-                                                                data-color="{{ $status->color }}"
-                                                                {{ $record?->status == $status->code ? 'selected' : '' }}>
-                                                                {{ $status->name }}
-                                                            </option>
-                                                        @endforeach
+    {{ $isLocked ? 'disabled' : '' }}
+    @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason)) disabled @endif>
+                                                        @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason))
+                                                            <option value="" selected>⚠️ يوم عطلة - لا يمكن التسجيل</option>
+                                                        @else
+                                                            @foreach($statuses as $status)
+                                                                <option value="{{ $status->code }}" 
+                                                                    data-color="{{ $status->color }}"
+                                                                    {{ $record?->status == $status->code ? 'selected' : '' }}>
+                                                                    {{ $status->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        @endif
                                                     </select>
                                                 </div>
                                             </td>

@@ -31,15 +31,20 @@ public function store(Request $request)
         'name' => 'required|string|max:100',
         'color' => 'required|string|max:7',
         'sort_order' => 'required|integer',
+        'type' => 'required|in:present,excluded,none',
     ]);
+
+    // تحديد القيم بناءً على النوع المختار
+    $countsAsPresent = $request->type === 'present';
+    $isExcluded = $request->type === 'excluded';
 
     AttendanceStatus::create([
         'code' => $request->code,
         'name' => $request->name,
         'color' => $request->color,
         'sort_order' => $request->sort_order,
-        'counts_as_present' => $request->boolean('counts_as_present'),
-        'is_excluded' => $request->boolean('is_excluded'),
+        'counts_as_present' => $countsAsPresent,
+        'is_excluded' => $isExcluded,
         'is_active' => $request->boolean('is_active'),
     ]);
 
@@ -60,6 +65,7 @@ public function update(Request $request, AttendanceStatus $status)
         'name' => 'required|string|max:100',
         'color' => 'required|string|max:7',
         'sort_order' => 'required|integer',
+        'type' => 'required|in:present,excluded,none',
     ]);
 
     // استخدام Transaction لضمان سلامة البيانات
@@ -69,15 +75,12 @@ public function update(Request $request, AttendanceStatus $status)
         $oldCountsAsPresent = $status->counts_as_present;
         $oldCode = $status->code; // Capture old code
         
-        // معالجة القيم البوليانية بشكل صحيح حتى مع JSON
-        $newIsExcluded = $request->boolean('is_excluded');
-        $newCountsAsPresent = $request->boolean('counts_as_present');
+        // تحديد القيم الجديدة بناءً على النوع
+        $newCountsAsPresent = $request->type === 'present';
+        $newIsExcluded = $request->type === 'excluded';
+        
         $isActive = $request->boolean('is_active');
         $newCode = $request->code;
-
-        // في حال كان النموذج HTML تقليدي (checkboxes)، إذا لم يكن موجوداً فهو false
-        // ولكن $request->boolean() يعالج الحالتين (وجود المفتاح كـ "on"/"1"/true أو عدم وجوده كـ false)
-        // ملاحظة: إذا كان الطلب Form submit، الـ checkboxes غير المختارة لا تُرسل، لذا boolean تعيد false وهذا صحيح.
 
         // تسجيل التغيير في التاريخ إذا تغيرت إعدادات الحساب
         if ($oldIsExcluded !== $newIsExcluded || $oldCountsAsPresent !== $newCountsAsPresent) {
