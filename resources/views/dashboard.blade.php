@@ -1,4 +1,6 @@
 <x-app-layout>
+
+السلام عليكم 
     <!-- الخلفية العامة: رمادي فاتح جداً شبيه بـ iOS/macOS -->
     <div class="min-h-screen bg-[#F5F5F7] dark:bg-[#1c1c1e] font-sans antialiased text-gray-900 dark:text-white transition-colors duration-300">
         
