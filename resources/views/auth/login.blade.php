@@ -98,11 +98,11 @@
             <span class="ms-2 text-sm text-gray-600 group-hover:text-gray-900 transition">{{ __('تذكرني') }}</span>
         </label>
 
-        @if (Route::has('password.request'))
+        <!-- @if (Route::has('password.request'))
             <a class="text-sm text-blue-600 hover:text-blue-800 font-semibold transition" href="{{ route('password.request') }}">
                 {{ __('نسيت كلمة المرور؟') }}
             </a>
-        @endif
+        @endif -->
     </div>س
 
     <div class="pt-2">
