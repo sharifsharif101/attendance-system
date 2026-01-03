@@ -107,7 +107,7 @@
 
     <div class="pt-2">
         <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-blue-900 bg-yellow-500 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition duration-300 shadow-[0_4px_14px_0_rgba(234,179,8,0.39)]">
-            {{ __('تسجيل الدخول') }}
+            {{ __('تسجيل سسسسسسسسسسسسالدخول') }}
         </button>
     </div>
 </form>
