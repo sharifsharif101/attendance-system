@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+
+    /* Sticky Table Header */
+    .table-sticky thead th {
+        @apply sticky top-0 z-10;
+        background: linear-gradient(to right, #f9fafb, #f3f4f6);
+    }
+
+    .dark .table-sticky thead th {
+        background: linear-gradient(to right, #1f2937, #111827);
+    }
+}

@@ -91,6 +91,11 @@
                                             <div class="mr-4">
                                                 <div class="text-sm font-bold text-gray-900 dark:text-gray-100">
                                                     {{ $activity->causer?->name ?? 'النظام' }}
+                                                    @if($activity->causer && method_exists($activity->causer, 'trashed') && $activity->causer->trashed())
+                                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-100 text-yellow-800 border border-yellow-200 mr-1">
+                                                            المستخدم محذوف
+                                                        </span>
+                                                    @endif
                                                 </div>
                                                 <div class="text-xs text-gray-500">
                                                     {{ $activity->causer?->email ?? 'System' }}

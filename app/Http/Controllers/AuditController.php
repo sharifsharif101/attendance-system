@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Spatie\Activitylog\Models\Activity;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class AuditController extends Controller
 {
+
     public function index(Request $request)
     {
         // الفلاتر
@@ -18,10 +20,23 @@ class AuditController extends Controller
         $dateTo = $request->get('date_to');
         $searchName = $request->get('search_name');
 
-        $activities = Activity::with(['causer', 'subject'])
+        $activities = Activity::with([
+            'causer' => function (MorphTo $morphTo) {
+                $morphTo->constrain([
+                    User::class => function ($q) { $q->withTrashed(); },
+                ]);
+            },
+            'subject' => function (MorphTo $morphTo) {
+                $morphTo->constrain([
+                    \App\Models\Employee::class => function ($q) { $q->withTrashed(); },
+                    User::class => function ($q) { $q->withTrashed(); },
+                    \App\Models\AttendanceStatus::class => function ($q) { $q->withTrashed(); },
+                ]);
+            }
+        ])
             ->when($searchName, function($q) use ($searchName) {
                 // البحث عن الموظفين بهذا الاسم
-                $employeeIds = \App\Models\Employee::where('name', 'like', "%{$searchName}%")->pluck('id');
+                $employeeIds = \App\Models\Employee::withTrashed()->where('name', 'like', "%{$searchName}%")->pluck('id');
                 // البحث عن سجلات الحضور لهؤلاء الموظفين
                 $attendanceRecordIds = \App\Models\AttendanceRecord::whereIn('employee_id', $employeeIds)->pluck('id');
 
@@ -58,7 +73,7 @@ class AuditController extends Controller
             ->withQueryString();
 
         // بيانات الفلاتر
-        $users = User::orderBy('name')->get();
+        $users = User::withTrashed()->orderBy('name')->get();
         
         $events = [
             'created' => 'إنشاء',

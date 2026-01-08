@@ -39,6 +39,16 @@
                                 </label>
                             @endforeach
                         </div>
+                        
+                        <div class="mb-4 max-w-xs">
+                            <label class="block text-gray-700 dark:text-gray-300 font-bold mb-2">مدة تحديث رمز QR (بالثواني)</label>
+                            <input type="number" 
+                                name="qr_refresh_seconds" 
+                                value="{{ $qrRefreshSeconds }}" 
+                                min="10" 
+                                step="5"
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200 dark:focus:ring-blue-800">
+                        </div>
                         <button type="submit" 
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                             حفظ الإعدادات الافتراضية

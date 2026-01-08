@@ -144,90 +144,106 @@
                             <input type="hidden" name="date" value="{{ $date }}">
                             <input type="hidden" name="department_id" value="{{ $departmentId }}">
 
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 mb-4">
-                                <thead class="bg-gray-50 dark:bg-gray-700">
-                               <tr>
-    <!-- عمود التحديد (لم يتم تغييره) -->
-    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-        <input type="checkbox" id="selectAll" 
-            class="rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700"
-            {{ $isLocked ? 'disabled' : '' }}>
-    </th>
-
-    <!-- عمود الرقم (رقمي) -->
-    <th onclick="sortTable(this)" data-type="number" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-        الرقم <span class="sort-icon text-gray-400">↕</span>
-    </th>
-
-    <!-- عمود الاسم (نصي) -->
-    <th onclick="sortTable(this)" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-        الاسم <span class="sort-icon text-gray-400">↕</span>
-    </th>
-
-    <!-- عمود الحالة (نصي) -->
-    <th onclick="sortTable(this)" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-        الحالة <span class="sort-icon text-gray-400">↕</span>
-    </th>
-
-    <!-- عمود الملاحظات (نصي) -->
-    <th onclick="sortTable(this)" class="cursor-pointer hover:text-gray-700 dark:hover:text-gray-100 px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-        ملاحظات <span class="sort-icon text-gray-400">↕</span>
-    </th>
-</tr>
-                                </thead>
-                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" id="employeesTableBody">
-                                    @foreach ($employees as $index => $employee)
-                                        @php
-                                            $record = $employee->attendanceRecords->first();
-                                        @endphp
-                                        <tr class="employee-row" 
-                                            data-name="{{ $employee->name }}" 
-                                            data-number="{{ $employee->employee_number }}">
-                                            <input type="hidden" name="attendance[{{ $index }}][employee_id]"
-                                                value="{{ $employee->id }}">
-
-                                            <td class="px-4 py-4 text-center">
-             <input type="checkbox" class="employee-checkbox rounded border-gray-300 dark:border-gray-600 text-blue-600 shadow-sm dark:bg-gray-700"
-    {{ $isLocked ? 'disabled' : '' }}>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $employee->employee_number }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                                {{ $employee->name }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center gap-2">
-                                            <span class="w-3 h-3 rounded-full status-color"
-                                                        style="background-color: {{ $statuses->firstWhere('code', $record?->status)?->color ?? '#6b7280' }}"></span>
-                                              <select name="attendance[{{ $index }}][status]"
-    class="status-select rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm text-sm"
-    {{ $isLocked ? 'disabled' : '' }}
-    @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason)) disabled @endif>
-                                                        @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason))
-                                                            <option value="" selected>⚠️ يوم عطلة - لا يمكن التسجيل</option>
-                                                        @else
-                                                            @foreach($statuses as $status)
-                                                                <option value="{{ $status->code }}" 
-                                                                    data-color="{{ $status->color }}"
-                                                                    {{ $record?->status == $status->code ? 'selected' : '' }}>
-                                                                    {{ $status->name }}
-                                                                </option>
-                                                            @endforeach
-                                                        @endif
-                                                    </select>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <input type="text" name="attendance[{{ $index }}][notes]"
-                                                    value="{{ $record?->notes }}"
-                                                    class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 shadow-sm text-sm w-full"
-                                                    placeholder="ملاحظات..." {{ $isLocked ? 'disabled' : '' }}>
-                                            </td>
+                            {{-- Material Design Table --}}
+                            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                                <table class="w-full">
+                                    {{-- Header --}}
+                                    <thead class="border-b border-gray-200 dark:border-gray-700">
+                                        <tr>
+                                            <th class="w-14 px-4 py-4">
+                                                <input type="checkbox" id="selectAll" 
+                                                    class="w-[18px] h-[18px] rounded-sm border-2 border-gray-400 text-blue-600 focus:ring-0 focus:ring-offset-0 cursor-pointer"
+                                                    {{ $isLocked ? 'disabled' : '' }}>
+                                            </th>
+                                            <th class="px-4 py-4 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                الرقم الوظيفي
+                                            </th>
+                                            <th class="px-4 py-4 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                اسم الموظف
+                                            </th>
+                                            <th class="px-4 py-4 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                الحالة
+                                            </th>
+                                            <th class="px-4 py-4 text-right text-sm font-medium text-gray-500 dark:text-gray-400">
+                                                ملاحظات
+                                            </th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    {{-- Body --}}
+                                    <tbody id="employeesTableBody">
+                                        @foreach ($employees as $index => $employee)
+                                            @php
+                                                $record = $employee->attendanceRecords->first();
+                                                $statusColor = $statuses->firstWhere('code', $record?->status)?->color ?? '#9e9e9e';
+                                            @endphp
+                                            <tr class="employee-row border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors" 
+                                                data-name="{{ $employee->name }}" 
+                                                data-number="{{ $employee->employee_number }}">
+                                                <input type="hidden" name="attendance[{{ $index }}][employee_id]" value="{{ $employee->id }}">
+
+                                                {{-- Checkbox --}}
+                                                <td class="px-4 py-3">
+                                                    <input type="checkbox" 
+                                                        class="employee-checkbox w-[18px] h-[18px] rounded-sm border-2 border-gray-400 text-blue-600 focus:ring-0 cursor-pointer"
+                                                        {{ $isLocked ? 'disabled' : '' }}>
+                                                </td>
+
+                                                {{-- Employee Number --}}
+                                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 font-mono">
+                                                    {{ $employee->employee_number }}
+                                                </td>
+
+                                                {{-- Employee Name --}}
+                                                <td class="px-4 py-3">
+                                                    <div class="flex items-center gap-3">
+                                                        <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-base font-medium"
+                                                            style="background-color: {{ ['#1976d2', '#388e3c', '#f57c00', '#7b1fa2', '#c2185b', '#00796b'][($index % 6)] }}">
+                                                            {{ mb_substr($employee->name, 0, 1) }}
+                                                        </div>
+                                                        <span class="text-sm text-gray-900 dark:text-gray-100">
+                                                            {{ $employee->name }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                                {{-- Status --}}
+                                                <td class="px-4 py-3">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="w-3 h-3 rounded-full flex-shrink-0 status-color"
+                                                            style="background-color: {{ $statusColor }}"></span>
+                                                        <select name="attendance[{{ $index }}][status]"
+                                                            class="status-select text-sm bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md py-2 pe-8 ps-3 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer min-w-[130px] appearance-none"
+                                                            style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%236b7280%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: left 0.5rem center; background-size: 1rem;"
+                                                            {{ $isLocked ? 'disabled' : '' }}
+                                                            @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason)) disabled @endif>
+                                                            @if(isset($nonWorkingDayReason) && !empty($nonWorkingDayReason))
+                                                                <option value="" selected>يوم عطلة</option>
+                                                            @else
+                                                                @foreach($statuses as $status)
+                                                                    <option value="{{ $status->code }}" 
+                                                                        data-color="{{ $status->color }}"
+                                                                        {{ $record?->status == $status->code ? 'selected' : '' }}>
+                                                                        {{ $status->name }}
+                                                                    </option>
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
+                                                    </div>
+                                                </td>
+
+                                                {{-- Notes --}}
+                                                <td class="px-4 py-3">
+                                                    <input type="text" name="attendance[{{ $index }}][notes]"
+                                                        value="{{ $record?->notes }}"
+                                                        class="w-full text-sm bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md py-2 px-3 text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        placeholder="ملاحظة..." 
+                                                        {{ $isLocked ? 'disabled' : '' }}>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
 
                             {{-- عدد النتائج --}}
                             <div class="mb-4 text-sm text-gray-500 dark:text-gray-400">

@@ -14,6 +14,9 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\EmployeeReportController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\BackupController;
+use App\Http\Controllers\QrDisplayController;
+use App\Http\Controllers\SelfAttendanceController;
 
 
 
@@ -99,6 +102,15 @@ Route::get('/audit/{activity}', [AuditController::class, 'show'])
         ->middleware('permission:users.manage')
         ->name('settings.resetMonth');
 
+    // Database Backup
+    Route::get('/backup/download', [BackupController::class, 'download'])
+        ->middleware('permission:users.manage')
+        ->name('backup.download');
+        
+    Route::get('/backup/files', [BackupController::class, 'downloadFiles'])
+        ->middleware('permission:users.manage')
+        ->name('backup.files');
+
     // إدارة المستخدمين
     Route::resource('users', UserController::class)
         ->middleware('permission:users.manage');
@@ -135,6 +147,19 @@ Route::get('/audit/{activity}', [AuditController::class, 'show'])
     Route::get('/documents/expiring', [EmployeeController::class, 'expiringDocuments'])
     ->middleware(['auth', 'permission:departments.manage'])
     ->name('documents.expiring');
+});
+
+// مسارات شاشة عرض QR (تحتاج تسجيل دخول)
+Route::middleware(['auth', 'permission:attendance.create'])->prefix('qr')->group(function () {
+    Route::get('/display', [QrDisplayController::class, 'show'])->name('qr.display');
+    Route::post('/generate', [QrDisplayController::class, 'generate'])->name('qr.generate');
+});
+
+// مسارات التسجيل الذاتي (عامة - بدون تسجيل دخول)
+Route::prefix('attend')->group(function () {
+    Route::get('/{token}', [SelfAttendanceController::class, 'showForm'])->name('attend.form');
+    Route::post('/{token}', [SelfAttendanceController::class, 'submit'])->name('attend.submit');
+    Route::get('/success/done', [SelfAttendanceController::class, 'success'])->name('attend.success');
 });
 
 require __DIR__.'/auth.php';

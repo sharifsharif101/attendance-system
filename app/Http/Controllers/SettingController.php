@@ -28,7 +28,9 @@ class SettingController extends Controller
             'saturday' => 'السبت',
         ];
 
-        return view('settings.index', compact('weekendDays', 'defaultWeekendDays', 'days', 'month', 'hasCustomSetting'));
+        $qrRefreshSeconds = Setting::get('qr_refresh_seconds', 60);
+
+        return view('settings.index', compact('weekendDays', 'defaultWeekendDays', 'days', 'month', 'hasCustomSetting', 'qrRefreshSeconds'));
     }
 
     // حفظ الإعدادات الافتراضية
@@ -36,6 +38,10 @@ class SettingController extends Controller
     {
         $weekendDays = $request->input('weekend_days', []);
         Setting::setWeekendDays($weekendDays);
+        
+        if ($request->has('qr_refresh_seconds')) {
+            Setting::set('qr_refresh_seconds', $request->input('qr_refresh_seconds'));
+        }
 
         return redirect()->route('settings.index')->with('success', 'تم حفظ الإعدادات الافتراضية بنجاح');
     }

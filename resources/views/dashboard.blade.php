@@ -55,17 +55,27 @@
                     {{-- بطاقة نسبة الحضور (Bento Box Style) --}}
                     <div class="col-span-12 lg:col-span-4 bg-white dark:bg-[#2c2c2e] rounded-[2.5rem] p-8 shadow-sm border border-gray-100 dark:border-gray-800 flex flex-col justify-center items-center relative overflow-hidden">
                         <div class="relative z-10 text-center">
-                            <div class="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
-                                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                                    <path class="text-gray-100 dark:text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
-                                    <path class="{{ $todayAttendanceRate >= 80 ? 'text-green-500' : ($todayAttendanceRate >= 50 ? 'text-yellow-500' : 'text-red-500') }}" 
-                                          stroke-dasharray="{{ $todayAttendanceRate }}, 100" 
-                                          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                                          fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-                                </svg>
-                                <span class="absolute text-2xl font-bold">{{ $todayAttendanceRate }}%</span>
-                            </div>
-                            <h3 class="text-gray-500 dark:text-gray-400 font-medium">نسبة الحضور اليوم</h3>
+                            @if($isHoliday)
+                                {{-- عرض رسالة العطلة --}}
+                                <div class="w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+                                    <span class="text-5xl">🏖️</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-700 dark:text-gray-200">اليوم عطلة رسمية</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">لا يُتوقع حضور الموظفين</p>
+                            @else
+                                {{-- عرض نسبة الحضور --}}
+                                <div class="w-24 h-24 mx-auto mb-4 relative flex items-center justify-center">
+                                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                        <path class="text-gray-100 dark:text-gray-700" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3" />
+                                        <path class="{{ $todayAttendanceRate >= 80 ? 'text-green-500' : ($todayAttendanceRate >= 50 ? 'text-yellow-500' : 'text-red-500') }}" 
+                                              stroke-dasharray="{{ $todayAttendanceRate }}, 100" 
+                                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                                              fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                                    </svg>
+                                    <span class="absolute text-2xl font-bold">{{ $todayAttendanceRate }}%</span>
+                                </div>
+                                <h3 class="text-gray-500 dark:text-gray-400 font-medium">نسبة الحضور اليوم</h3>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -340,6 +350,16 @@
                             <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">⚙️</span>
                             <span class="text-xs font-medium">الإعدادات</span>
                         </a>
+                        @can('users.manage')
+                        <a href="{{ route('backup.download') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-white/5 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition group">
+                            <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">💾</span>
+                            <span class="text-xs font-medium">نسخة قاعدة البيانات</span>
+                        </a>
+                        <a href="{{ route('backup.files') }}" class="flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-white/5 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition group">
+                            <span class="text-2xl mb-2 group-hover:scale-110 transition-transform">📂</span>
+                            <span class="text-xs font-medium">نسخة الملفات</span>
+                        </a>
+                        @endcan
                     </div>
                 </div>
 

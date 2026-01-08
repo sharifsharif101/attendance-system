@@ -60,22 +60,27 @@ class DashboardController extends Controller
         
         $todayAbsent = $todayStats['absent'] ?? 0;
         
-        // نسبة الحضور اليوم (مع استثناء الإجازات والعطلات الرسمية)
-        $isHoliday = \App\Models\OfficialHoliday::isHoliday($today);
+        // نسبة الحضور اليوم (مع استثناء الإجازات والعطلات الرسمية وأيام العطلة الأسبوعية)
+        $isOfficialHoliday = \App\Models\OfficialHoliday::isHoliday($today);
+        
+        // التحقق من أيام العطلة الأسبوعية
+        $weekendDays = MonthlySetting::getWeekendDays($currentMonth);
+        $dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        $dayOfWeek = Carbon::parse($today)->dayOfWeek;
+        $isWeekend = in_array($dayMap[$dayOfWeek], $weekendDays);
+        
+        // اليوم يعتبر عطلة إذا كان عطلة رسمية أو يوم عطلة أسبوعية
+        $isHoliday = $isOfficialHoliday || $isWeekend;
         
         if ($isHoliday) {
-            // إذا كان اليوم عطلة رسمية، فإن عدد الموظفين المطلوب منهم الحضور هو 0 (إلا من حضر)
-            // لكن لغايات العرض في الداشبورد، يمكننا اعتبار نسبة الحضور 100% أو -
-            // الأفضل: اعتبار أن "Effective Employees" هو 0، وبالتالي النسبة 0 (أو نعالجها في الفيو)
-            // هنا سأقوم بحيلة: إذا كان عطلة، نعتبر المستثنين هم (الكل - الحضور)
-            // أي أن كل من غاب هو "مستثنى" بسبب العطلة
+            // إذا كان اليوم عطلة، نعتبر المستثنين هم (الكل - الحضور)
             $todayExcluded = $totalEmployees - $todayPresent; 
         }
 
         $effectiveEmployees = $totalEmployees - $todayExcluded;
         $todayAttendanceRate = $effectiveEmployees > 0 
             ? round(($todayPresent / $effectiveEmployees) * 100) 
-            : ($isHoliday ? 100 : 0); // إذا كان عطلة والكل غاب، نعطي 100% بدلاً من 0
+            : ($isHoliday ? 100 : 0);
         
         // إحصائيات الشهر الحالي
         $startOfMonth = Carbon::now()->startOfMonth()->format('Y-m-d');
@@ -175,6 +180,7 @@ return view('dashboard', compact(
     'recentRecords',
     'today',
     'currentMonth',
+    'isHoliday',
     'expiringPassports',
     'expiringResidencies',
     'expiringContracts',

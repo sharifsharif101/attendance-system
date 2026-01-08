@@ -16,6 +16,7 @@ class AttendanceRecord extends Model
         'date',
         'status',
         'check_in_time',
+        'check_out_time',
         'notes',
         'recorded_by',
         'is_excluded_snapshot',
@@ -25,6 +26,7 @@ class AttendanceRecord extends Model
     protected $casts = [
         'date' => 'date',
         'check_in_time' => 'datetime:H:i',
+        'check_out_time' => 'datetime:H:i',
         'is_excluded_snapshot' => 'boolean',
         'counts_as_present_snapshot' => 'boolean',
     ];
